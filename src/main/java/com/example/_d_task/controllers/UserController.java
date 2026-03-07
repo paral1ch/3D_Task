@@ -1,12 +1,10 @@
 package com.example._d_task.controllers;
 
-import com.example._d_task.DTO.RegisterDTO;
 import com.example._d_task.Services.UserService;
 import com.example._d_task.models.UserModel;
+import com.example._d_task.repositories.SessionRepository;
 import com.example._d_task.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,6 +12,10 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SessionRepository sessionRepository;
+
     @Autowired
     private UserService userService;
 
@@ -23,6 +25,12 @@ public class UserController {
         return userRepository.findAll();
     }
 
+    @PostMapping(path = "/logout")
+    public @ResponseBody String logout(@RequestHeader("Authorization") String header){
+        String token = header.substring(7);
+        sessionRepository.delete(sessionRepository.findByToken(token));
+        return "Complete";
+    }
 
 
 

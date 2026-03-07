@@ -3,18 +3,18 @@ package com.example._d_task.DTO;
 public class UserDTO {
     private Integer user_id;
 
-    private String user_name;
-    private String display_name;
+    private String fullName;
+    private String username;
     private String email;
 
 
     public UserDTO(){}
 
-    public String getDisplayName(){
-        return this.display_name;
+    public String getUsername(){
+        return this.username;
     }
     public String getUserName(){
-        return this.user_name;
+        return this.fullName;
     }
 
     public String getEmail(){
@@ -25,7 +25,7 @@ public class UserDTO {
         return this.user_id;
     }
     public void setDisplay_name(String display_name) {
-        this.display_name = display_name;
+        this.username = display_name;
     }
 
     public void setEmail(String email) {
@@ -33,7 +33,7 @@ public class UserDTO {
     }
 
     public void setName(String name) {
-        this.user_name = name;
+        this.fullName = name;
     }
 
 }
