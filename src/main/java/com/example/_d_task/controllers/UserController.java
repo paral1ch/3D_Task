@@ -1,5 +1,6 @@
 package com.example._d_task.controllers;
 
+import com.example._d_task.Security.Classes.Auth;
 import com.example._d_task.Services.UserService;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.SessionRepository;
@@ -32,6 +33,17 @@ public class UserController {
         return "Complete";
     }
 
+    @GetMapping(path = "/profile")
+    public @ResponseBody UserModel profile(){
+        if(!Auth.check()){return null;}
+        return Auth.user();
+    }
+
+    @GetMapping(path = "/userByToken")
+    public @ResponseBody String test(@RequestHeader("Authorization") String header){
+        String token = header.substring(7);
+        return sessionRepository.findUserByToken(token).getUsername();
+    }
 
 
 }

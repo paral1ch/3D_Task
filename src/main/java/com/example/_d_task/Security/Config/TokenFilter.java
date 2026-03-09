@@ -1,4 +1,4 @@
-package com.example._d_task.Config.Security;
+package com.example._d_task.Security.Config;
 
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.SessionRepository;
@@ -44,7 +44,7 @@ public class TokenFilter extends OncePerRequestFilter {
                 );
 
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(user.getEmail(),null,authorities);
+                        new UsernamePasswordAuthenticationToken(user,null,authorities);
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
 
