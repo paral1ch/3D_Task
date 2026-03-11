@@ -1,5 +1,6 @@
 package com.example._d_task.models;
 
+import com.example._d_task.DTO.UserDTO;
 import com.example._d_task.ENUMS.Role;
 import jakarta.persistence.*;
 import org.jspecify.annotations.Nullable;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name="users")
@@ -29,6 +31,7 @@ public class UserModel implements UserDetails {
     private Role role;
 
     public UserModel(){}
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -74,4 +77,21 @@ public class UserModel implements UserDetails {
     }
 
     public void setRole(Role role){this.role = role;}
+
+    public UserDTO getUserDTO(){
+        return new UserDTO(this.username,this.email,this.fullName,this.user_id);
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserModel user = (UserModel) o;
+        return Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(this.email,this.user_id);
+    }
 }

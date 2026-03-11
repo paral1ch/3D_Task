@@ -2,6 +2,7 @@ package com.example._d_task.Services;
 
 
 import com.example._d_task.DTO.ProjectDTO;
+import com.example._d_task.DTO.UserDTO;
 import com.example._d_task.ENUMS.ProjectRoles;
 import com.example._d_task.Security.Classes.Auth;
 import com.example._d_task.models.ProjectModel;
@@ -57,4 +58,18 @@ public class ProjectServices {
         return userProject;
     }
 
+    public ProjectDTO convertModelToDTO(ProjectModel project){
+
+        return new ProjectDTO();
+    }
+
+    public void updateRoles(UserDTO user, Integer project_id){
+        userProjectRepository.deleteByUserIdAndProjectId(user.getUserId(),project_id);
+        user.getRoles().forEach(role ->
+                userProjectRepository.save(new UserProjectModel(
+                        user.getUserId(),project_id,role
+                ))
+        );
+
+    }
 }

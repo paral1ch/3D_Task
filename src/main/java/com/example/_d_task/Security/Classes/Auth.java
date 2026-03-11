@@ -1,10 +1,15 @@
 package com.example._d_task.Security.Classes;
 
+import com.example._d_task.Services.UserService;
 import com.example._d_task.models.UserModel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class Auth {
+
+    @Autowired
+    UserService userService;
 
     public static UserModel user(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -19,6 +24,8 @@ public class Auth {
         }
         return null;
     }
+
+
 
     public static boolean check(){
         return user()!=null;

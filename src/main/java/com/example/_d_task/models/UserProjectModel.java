@@ -36,6 +36,12 @@ public class UserProjectModel {
 
     public UserProjectModel(){}
 
+    public UserProjectModel(Integer user_id,Integer project_id,ProjectRoles role){
+        this.project_role=role;
+        this.project_id = project_id;
+        this.user_id=user_id;
+    }
+
     public void setProject_id(Integer project_id) {
         this.project_id = project_id;
     }

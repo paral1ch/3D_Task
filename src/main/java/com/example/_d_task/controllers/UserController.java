@@ -1,11 +1,14 @@
 package com.example._d_task.controllers;
 
+import com.example._d_task.DTO.UserDTO;
 import com.example._d_task.Security.Classes.Auth;
 import com.example._d_task.Services.UserService;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.SessionRepository;
 import com.example._d_task.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,9 +37,9 @@ public class UserController {
     }
 
     @GetMapping(path = "/profile")
-    public @ResponseBody UserModel profile(){
+    public @ResponseBody UserDTO profile(){
         if(!Auth.check()){return null;}
-        return Auth.user();
+        return Auth.user().getUserDTO();
     }
 
     @GetMapping(path = "/userByToken")
@@ -46,4 +49,21 @@ public class UserController {
     }
 
 
+    @PostMapping(path = "/profile/edit")
+    public ResponseEntity<?> editProfile(UserDTO user){
+        UserModel origUser = Auth.user();
+        if(user.getUsername()!=origUser.getUsername() && userRepository.existsByUsername(user.getUsername())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Username already taken");
+        }
+
+        if(user.getEmail()!=origUser.getEmail() && userRepository.existsByEmail(user.getEmail())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Email already exists");
+        }
+
+        origUser.setUsername(user.getUsername());
+        origUser.setEmail(profile().getEmail());
+        origUser.setFullName(user.getFullname());
+        userRepository.save(origUser);
+        return ResponseEntity.ok("Saved");
+    }
 }
