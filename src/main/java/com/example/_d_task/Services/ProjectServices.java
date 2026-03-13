@@ -40,8 +40,8 @@ public class ProjectServices {
     public UserProjectModel createUserProjectFrom(ProjectModel project){
         UserModel user = Auth.user();
         UserProjectModel userProject = new UserProjectModel();
-        userProject.setProject_id(project.getProject_id());
-        userProject.setUser_id(user.getUserId());
+        userProject.setProject(project);
+        userProject.setUser(user);
         userProject.setProject_role(ProjectRoles.CREATOR);
         userProjectRepository.save(userProject);
         return userProject;
@@ -51,8 +51,8 @@ public class ProjectServices {
 
         UserModel user = userRepository.findByEmail(email);
         UserProjectModel userProject = new UserProjectModel();
-        userProject.setProject_id(project.getProject_id());
-        userProject.setUser_id(user.getUserId());
+        userProject.setProject(project);
+        userProject.setUser(user);
         userProject.setProject_role(ProjectRoles.USER);
         userProjectRepository.save(userProject);
         return userProject;
@@ -67,7 +67,7 @@ public class ProjectServices {
         userProjectRepository.deleteByUserIdAndProjectId(user.getUserId(),project_id);
         user.getRoles().forEach(role ->
                 userProjectRepository.save(new UserProjectModel(
-                        user.getUserId(),project_id,role
+                        userRepository.findByEmail(user.getEmail()),projectRepository.findByProjectId(project_id),role
                 ))
         );
 

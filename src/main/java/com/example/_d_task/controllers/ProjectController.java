@@ -142,4 +142,15 @@ public class ProjectController {
     }
 
 
+    @PostMapping(path = "/{project_id}/delete")
+    public ResponseEntity<?> deleteProject(@PathVariable Integer project_id){
+        if (!userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
+                project_id).contains(ProjectRoles.CREATOR)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("no right");
+        }
+
+        projectRepository.delete(projectRepository.findByProjectId(project_id));
+        return ResponseEntity.ok(project_id + " deleted");
+    }
+
 }

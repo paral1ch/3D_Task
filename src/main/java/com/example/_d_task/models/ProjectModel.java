@@ -21,12 +21,11 @@ public class ProjectModel {
     @Column(name = "user_id")
     private Integer user_id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name ="user_id", referencedColumnName = "user_id",insertable = false,updatable = false)
     private UserModel user;
 
-    @OneToMany
-    @JoinColumn(name ="project_id", referencedColumnName = "project_id", insertable = false,updatable = false)
+    @OneToMany(mappedBy = "project",cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<UserProjectModel> userProjectModel;
 
     public ProjectModel(){}
