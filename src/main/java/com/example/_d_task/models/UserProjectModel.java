@@ -1,7 +1,7 @@
 package com.example._d_task.models;
 
 
-import com.example._d_task.ENUMS.ProjectRoles;
+import com.example._d_task.enums.ProjectRoles;
 import jakarta.persistence.*;
 
 @Entity

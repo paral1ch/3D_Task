@@ -1,14 +1,14 @@
 package com.example._d_task.controllers;
 
 
-import com.example._d_task.DTO.InviteDTO;
-import com.example._d_task.DTO.ProjectDTO;
-import com.example._d_task.DTO.UserDTO;
-import com.example._d_task.ENUMS.ProjectRolePermissions;
-import com.example._d_task.ENUMS.ProjectRoles;
-import com.example._d_task.Security.Classes.Auth;
-import com.example._d_task.Services.ProjectServices;
-import com.example._d_task.Services.UserService;
+import com.example._d_task.dto.InviteDTO;
+import com.example._d_task.dto.ProjectDTO;
+import com.example._d_task.dto.UserDTO;
+import com.example._d_task.enums.ProjectRolePermissions;
+import com.example._d_task.enums.ProjectRoles;
+import com.example._d_task.security.Classes.Auth;
+import com.example._d_task.services.ProjectServices;
+import com.example._d_task.services.UserService;
 import com.example._d_task.models.ProjectModel;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.ProjectRepository;
@@ -128,7 +128,7 @@ public class ProjectController {
 
     @GetMapping(path = "/{project_id}/users/edit")
     public ResponseEntity<?> getProjectUsers(@PathVariable Integer project_id, UserDTO userDTO){
-        if(ProjectRolePermissions.canModify(userProjectRepository.
+        if(ProjectRolePermissions.canModifyProject(userProjectRepository.
                 findRolesByUserAndProject(Auth.user().getUserId(), project_id))){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
         }
@@ -141,16 +141,15 @@ public class ProjectController {
         ));
     }
 
-
     @PostMapping(path = "/{project_id}/delete")
     public ResponseEntity<?> deleteProject(@PathVariable Integer project_id){
         if (!userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
                 project_id).contains(ProjectRoles.CREATOR)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("no right");
         }
-
         projectRepository.delete(projectRepository.findByProjectId(project_id));
         return ResponseEntity.ok(project_id + " deleted");
     }
+
 
 }

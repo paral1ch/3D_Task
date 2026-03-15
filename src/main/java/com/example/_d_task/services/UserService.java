@@ -1,8 +1,8 @@
-package com.example._d_task.Services;
+package com.example._d_task.services;
 
-import com.example._d_task.DTO.RegisterDTO;
-import com.example._d_task.DTO.UserDTO;
-import com.example._d_task.ENUMS.Role;
+import com.example._d_task.dto.RegisterDTO;
+import com.example._d_task.dto.UserDTO;
+import com.example._d_task.enums.Role;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;

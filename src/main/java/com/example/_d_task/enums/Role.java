@@ -1,4 +1,4 @@
-package com.example._d_task.ENUMS;
+package com.example._d_task.enums;
 
 
 

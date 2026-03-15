@@ -1,4 +1,4 @@
-package com.example._d_task.DTO;
+package com.example._d_task.dto;
 
 import com.example._d_task.models.ProjectModel;
 

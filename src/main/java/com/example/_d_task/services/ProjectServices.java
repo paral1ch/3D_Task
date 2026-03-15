@@ -1,10 +1,10 @@
-package com.example._d_task.Services;
+package com.example._d_task.services;
 
 
-import com.example._d_task.DTO.ProjectDTO;
-import com.example._d_task.DTO.UserDTO;
-import com.example._d_task.ENUMS.ProjectRoles;
-import com.example._d_task.Security.Classes.Auth;
+import com.example._d_task.dto.ProjectDTO;
+import com.example._d_task.dto.UserDTO;
+import com.example._d_task.enums.ProjectRoles;
+import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.models.ProjectModel;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.models.UserProjectModel;
@@ -70,6 +70,9 @@ public class ProjectServices {
                         userRepository.findByEmail(user.getEmail()),projectRepository.findByProjectId(project_id),role
                 ))
         );
+    }
 
+    public boolean userHasAccess(Integer user_id, Integer project_id){
+        return userProjectRepository.findRolesByUserAndProject(user_id,project_id).isEmpty();
     }
 }

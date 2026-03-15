@@ -1,4 +1,4 @@
-package com.example._d_task.Security.Config;
+package com.example._d_task.security.Config;
 
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.SessionRepository;

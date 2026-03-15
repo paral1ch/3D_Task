@@ -1,6 +1,6 @@
-package com.example._d_task.DTO;
+package com.example._d_task.dto;
 
-import com.example._d_task.ENUMS.ProjectRoles;
+import com.example._d_task.enums.ProjectRoles;
 
 import java.util.List;
 

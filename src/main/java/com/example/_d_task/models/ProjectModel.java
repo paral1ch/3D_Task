@@ -28,6 +28,9 @@ public class ProjectModel {
     @OneToMany(mappedBy = "project",cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<UserProjectModel> userProjectModel;
 
+    @OneToMany(mappedBy = "project",cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<TaskModel> tasks;
+
     public ProjectModel(){}
 
 

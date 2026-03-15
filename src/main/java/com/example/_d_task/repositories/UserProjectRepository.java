@@ -1,7 +1,7 @@
 package com.example._d_task.repositories;
 
 
-import com.example._d_task.ENUMS.ProjectRoles;
+import com.example._d_task.enums.ProjectRoles;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.models.UserProjectModel;
 import org.springframework.data.jpa.repository.JpaRepository;

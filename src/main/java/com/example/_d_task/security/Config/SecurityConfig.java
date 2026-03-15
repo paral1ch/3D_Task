@@ -1,4 +1,4 @@
-package com.example._d_task.Security.Config;
+package com.example._d_task.security.Config;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/***").permitAll()
                         .requestMatchers("/Users/***").hasRole("USER")
                         .requestMatchers("/project/***").hasRole("USER")
+                        .requestMatchers("/task/***").hasRole("User")
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable).addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 

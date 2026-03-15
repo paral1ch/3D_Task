@@ -1,8 +1,8 @@
 package com.example._d_task.controllers;
 
 
-import com.example._d_task.DTO.RegisterDTO;
-import com.example._d_task.Services.UserService;
+import com.example._d_task.dto.RegisterDTO;
+import com.example._d_task.services.UserService;
 import com.example._d_task.models.SessionModel;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.SessionRepository;

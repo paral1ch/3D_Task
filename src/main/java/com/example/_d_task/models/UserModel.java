@@ -1,7 +1,7 @@
 package com.example._d_task.models;
 
-import com.example._d_task.DTO.UserDTO;
-import com.example._d_task.ENUMS.Role;
+import com.example._d_task.dto.UserDTO;
+import com.example._d_task.enums.Role;
 import jakarta.persistence.*;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
