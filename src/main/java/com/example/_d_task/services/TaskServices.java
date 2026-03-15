@@ -9,6 +9,8 @@ import com.example._d_task.security.Classes.Auth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class TaskServices {
     @Autowired
@@ -28,4 +30,28 @@ public class TaskServices {
         taskRepository.save(task);
     }
 
+    public void deleteTask(Integer task_id){
+        TaskModel taskOrig = taskRepository.findById(task_id);
+        List<TaskModel> tasks = taskRepository.findTaskAsParent(task_id);
+        if(!tasks.isEmpty()){
+            for (TaskModel task : tasks) {
+                task.setParent_task_id(taskOrig.getParent_task_id());
+                taskRepository.save(task);
+            }
+
+        }
+        taskRepository.delete(taskOrig);
+    }
+
+    public TaskDTO taskToDTO(TaskModel task){
+        TaskDTO dto = new TaskDTO();
+        dto.setTask_id(task.getTask_id());
+        dto.setDescription(task.getDescription());
+        dto.setName(task.getName());
+        dto.setStatus(task.getStatus());
+        dto.setUser_id(task.getUser().getUserId());
+        dto.setProject_id(task.getProject().getProject_id());
+        dto.setParent_task_id(task.getParent_task_id());
+        return dto;
+    }
 }

@@ -5,8 +5,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface TaskRepository  extends JpaRepository<TaskModel, Long> {
 
     @Query("SELECT t FROM TaskModel as t WHERE t.task_id = :task_id AND t.project.project_id = :project_id")
     TaskModel findByProjectIdAndTaskID(@Param("task_id") Integer task_id, @Param("project_id") Integer project_id);
+
+    @Query("SELECT t FROM TaskModel as t WHERE t.task_id = :task_id")
+    TaskModel findById(@Param("task_id") Integer task_id);
+
+    @Query("SELECT t FROM TaskModel as t WHERE t.parent_task_id = :task_id")
+    List<TaskModel> findTaskAsParent(@Param("task_id") Integer task_id);
 }

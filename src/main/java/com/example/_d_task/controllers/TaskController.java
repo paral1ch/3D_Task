@@ -25,6 +25,8 @@ public class TaskController {
 
     @Autowired
     private TaskRepository taskRepository;
+
+
     @PostMapping(path = "/create")
     public ResponseEntity<?> createTask(@RequestBody TaskDTO taskDTO, @PathVariable Integer project_id){
         ;
@@ -41,4 +43,29 @@ public class TaskController {
 
         return ResponseEntity.ok("Created");
     }
+
+    @PostMapping("/{task_id}/delete")
+    public ResponseEntity<?> deleteTask(@PathVariable("project_id") Integer project_id ,
+                                        @PathVariable("task_id") Integer task_id){
+        if(!ProjectRolePermissions.canCreateTask(
+                userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),project_id))){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have permission");
+        }
+
+        taskServices.deleteTask(task_id);
+        return ResponseEntity.ok("Deleted");
+    }
+
+    @GetMapping("/{task_id}/get")
+    public ResponseEntity<?> getTask(@PathVariable("task_id") Integer task_id,@PathVariable("project_id") Integer project_id){
+        if(!userProjectRepository.getUsersFromProject(project_id).contains(Auth.user())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a part of that project");
+        }
+
+        return ResponseEntity.ok(taskServices.taskToDTO(
+                taskRepository.findById(task_id)
+        ));
+    }
+
+
 }

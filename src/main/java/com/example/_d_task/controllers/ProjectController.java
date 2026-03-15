@@ -6,18 +6,21 @@ import com.example._d_task.dto.ProjectDTO;
 import com.example._d_task.dto.UserDTO;
 import com.example._d_task.enums.ProjectRolePermissions;
 import com.example._d_task.enums.ProjectRoles;
-import com.example._d_task.security.Classes.Auth;
-import com.example._d_task.services.ProjectServices;
-import com.example._d_task.services.UserService;
 import com.example._d_task.models.ProjectModel;
 import com.example._d_task.models.UserModel;
+import com.example._d_task.models.UserProjectModel;
 import com.example._d_task.repositories.ProjectRepository;
 import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
+import com.example._d_task.security.Classes.Auth;
+import com.example._d_task.services.ProjectServices;
+import com.example._d_task.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(path="/project")
@@ -151,5 +154,62 @@ public class ProjectController {
         return ResponseEntity.ok(project_id + " deleted");
     }
 
+    @PostMapping("/{project_id}/deleteUser/{user_id}")
+    public ResponseEntity<?> deleteUserFromProject(@PathVariable("project_id") Integer project_id,
+                                                   @PathVariable("user_id") Integer user_id){
+
+        if(Auth.user().getUserId()==user_id){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cant delete yourself");
+        }
+        List<ProjectRoles> roles = userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
+                project_id);
+        if(!ProjectRolePermissions.canModifyProject(roles)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+        }
+
+        userProjectRepository.deleteByUserIdAndProjectId(
+                user_id,project_id
+        );
+        return ResponseEntity.ok("Deleted user");
+    }
+
+    @PostMapping("/{project_id}/addRole/{user_id}")
+    public ResponseEntity<?> addRole(@PathVariable("project_id") Integer project_id,
+                                                   @PathVariable("user_id") Integer user_id){
+        if(!ProjectRolePermissions.canModifyProject(
+                userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
+                        project_id)
+        )){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+        }
+
+        if(userProjectRepository.findRolesByUserAndProject(user_id,project_id).contains(ProjectRoles.TASK_CREATOR)){
+           return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role is already assigned to that user");
+        }
+        UserProjectModel pr = new UserProjectModel(
+                userRepository.findById(user_id),
+                projectRepository.findByProjectId(project_id),
+                ProjectRoles.TASK_CREATOR
+        );
+        userProjectRepository.save(pr);
+        return ResponseEntity.ok("Role added");
+    }
+
+    @PostMapping("/{project_id}/deleteRole/{user_id}")
+    public ResponseEntity<?> deleteRole(@PathVariable("project_id") Integer project_id,
+                                     @PathVariable("user_id") Integer user_id){
+        if(!ProjectRolePermissions.canModifyProject(
+                userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
+                        project_id)
+        )){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+        }
+
+        if(!userProjectRepository.findRolesByUserAndProject(user_id,project_id).contains(ProjectRoles.TASK_CREATOR)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("That user dont have role");
+        }
+        userProjectRepository.deleteByUserIdAndProjectIdAndRole(user_id,project_id,ProjectRoles.TASK_CREATOR);
+        return ResponseEntity.ok("Role deleted");
+    }
 
 }
