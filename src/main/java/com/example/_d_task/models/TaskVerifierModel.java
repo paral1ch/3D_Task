@@ -1,0 +1,24 @@
+package com.example._d_task.models;
+
+
+import com.example._d_task.models.Id.TaskVerifierId;
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Entity
+@Table(name = "task_verifier")
+@Data
+@IdClass(TaskVerifierId.class)
+public class TaskVerifierModel {
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserModel user;
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    private TaskModel task;
+
+
+}

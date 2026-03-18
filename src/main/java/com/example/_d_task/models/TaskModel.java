@@ -5,6 +5,9 @@ import com.example._d_task.enums.TaskEnum;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+import java.util.List;
+
 
 @Data
 @Entity
@@ -36,7 +39,17 @@ public class TaskModel {
     @Column(name = "status")
     private TaskEnum status;
 
+    @Column(name = "deadline")
+    private LocalDate deadline;
 
+    @OneToMany(mappedBy = "task",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskExecutorModel> task_executors;
+
+    @OneToMany(mappedBy = "task",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskVerifierModel> task_verifiers;
+
+    @OneToMany(mappedBy = "task",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskCommentModel> comments;
 
     public TaskModel(){}
 

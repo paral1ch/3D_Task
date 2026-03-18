@@ -3,6 +3,7 @@ package com.example._d_task.services;
 
 import com.example._d_task.dto.ProjectDTO;
 import com.example._d_task.dto.UserDTO;
+import com.example._d_task.enums.ProjectRolePermissions;
 import com.example._d_task.enums.ProjectRoles;
 import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.models.ProjectModel;
@@ -13,6 +14,9 @@ import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectServices {
@@ -25,6 +29,14 @@ public class ProjectServices {
 
     @Autowired
     private UserRepository userRepository;
+
+    public boolean canModifyTasks(Integer project_id){
+
+        return ProjectRolePermissions.canCreateTask(
+                userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id)
+        );
+    }
+
 
     public ProjectModel createProjectFromDTO(ProjectDTO projectDTO){
         UserModel user = Auth.user();
@@ -75,4 +87,6 @@ public class ProjectServices {
     public boolean userHasAccess(Integer user_id, Integer project_id){
         return userProjectRepository.findRolesByUserAndProject(user_id,project_id).isEmpty();
     }
+
+
 }

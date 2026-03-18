@@ -2,15 +2,21 @@ package com.example._d_task.dto;
 
 import com.example._d_task.enums.ProjectRoles;
 import com.example._d_task.models.UserModel;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
 public class UserDTO {
+    @Nullable
     private Integer user_id;
 
+    @Nullable
     private String fullName;
+    @Nullable
     private String username;
+    @Nullable
     private String email;
+    @Nullable
     private List<ProjectRoles> roles;
 
     public UserDTO(){}
@@ -56,6 +62,9 @@ public class UserDTO {
         return this.email;
     }
 
+    public void setUserId(Integer user_id){
+        this.user_id = user_id;
+    }
     public Integer getUserId(){
         return this.user_id;
     }

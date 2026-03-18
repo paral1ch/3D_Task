@@ -14,6 +14,7 @@ import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
 import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.services.ProjectServices;
+import com.example._d_task.services.TaskServices;
 import com.example._d_task.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,9 @@ public class ProjectController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TaskServices taskServices;
 
 
     @GetMapping(path = "/{project_id}")
@@ -212,4 +216,12 @@ public class ProjectController {
         return ResponseEntity.ok("Role deleted");
     }
 
+    @GetMapping("{project_id}/getTasks")
+    public ResponseEntity<?> getTasks(@PathVariable("project_id") Integer project_id){
+        if(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id) ==null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cant get tasks from that project");
+        }
+
+        return ResponseEntity.ok(taskServices.convertModelsToDTOInTask(projectRepository.findTasks(project_id)));
+    }
 }

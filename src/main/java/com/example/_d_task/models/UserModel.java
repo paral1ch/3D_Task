@@ -34,6 +34,11 @@ public class UserModel implements UserDetails {
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProjectModel> projects = new ArrayList<>();
 
+    @OneToMany
+    @JoinColumn(name = "task_id")
+    private List<TaskModel> tasks;
+
+
     public UserModel(){}
 
 
