@@ -23,7 +23,8 @@ public class SecurityConfig {
                 .requestMatchers("/auth/***").permitAll()
                         .requestMatchers("/Users/***").hasRole("USER")
                         .requestMatchers("/project/***").hasRole("USER")
-                        .requestMatchers("/task/***").hasRole("User")
+                        .requestMatchers("/task/***").hasRole("USER")
+                        .requestMatchers("/files/***").hasRole("USER")
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable).addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 

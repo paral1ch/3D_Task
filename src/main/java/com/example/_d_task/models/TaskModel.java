@@ -50,7 +50,8 @@ public class TaskModel {
 
     @OneToMany(mappedBy = "task",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskCommentModel> comments;
-
+    @OneToMany(mappedBy = "task",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FileMetadataModel> files;
     public TaskModel(){}
 
 
