@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
+
 @RestController
 @RequestMapping(path="/auth")
 public class AuthController {
@@ -51,11 +53,15 @@ public class AuthController {
         }
 
 
-        if(user.getPashHash() == login.getPasswordHash()){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong password or email (Wrong password)");
+        if(!Objects.equals(user.getPashHash(), login.getPasswordHash())){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong password or email (Wrong password)" + user.getPashHash() + "________" + login.getPasswordHash());
         }
 
-        String token = login.getEmail()+login.getUsername();
+        String token = user.getEmail()+user.getUsername();
+
+        if(sessionRepository.findByToken(token)!=null){
+            return ResponseEntity.ok(token);
+        }
 
         SessionModel session = new SessionModel();
         session.setSessionToken(token);

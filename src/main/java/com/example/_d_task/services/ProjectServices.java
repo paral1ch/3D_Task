@@ -75,6 +75,15 @@ public class ProjectServices {
         return new ProjectDTO();
     }
 
+    public List<ProjectDTO> convertModelsToDTOInProject(List<ProjectModel> projects){
+        return projects.stream().map(
+                project -> new ProjectDTO(project,userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
+                        project.getProject_id()))
+        ).collect(Collectors.toList());
+    }
+
+
+
     public void updateRoles(UserDTO user, Integer project_id){
         userProjectRepository.deleteByUserIdAndProjectId(user.getUserId(),project_id);
         user.getRoles().forEach(role ->

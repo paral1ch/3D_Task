@@ -20,4 +20,7 @@ public interface ProjectRepository extends JpaRepository<ProjectModel, Long> {
 
     @Query("SELECT pm FROM ProjectModel as pm WHERE pm.project_id IN (SELECT tm.project.project_id FROM TaskModel as tm WHERE tm.task_id = :task_id)")
     ProjectModel findByTaskId(@Param("task_id") Integer task_id);
+
+    @Query("SELECT pm FROM ProjectModel as pm WHERE :user_id in (SELECT pm1.user_id FROM ProjectModel as pm1 where pm1.user_id=:user_id)")
+    List<ProjectModel> findProjects(@Param("user_id") Integer user_id);
 }

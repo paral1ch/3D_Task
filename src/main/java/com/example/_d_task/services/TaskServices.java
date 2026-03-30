@@ -38,6 +38,7 @@ public class TaskServices {
         task.setUser(Auth.user());
         task.setStatus(TaskEnum.IN_PROGRESS);
         task.setProject(projectRepository.findByProjectId(project_id));
+        task.setDeadline(taskDTO.getDeadline());
         taskRepository.save(task);
     }
 

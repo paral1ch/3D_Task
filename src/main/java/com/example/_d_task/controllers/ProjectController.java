@@ -45,6 +45,16 @@ public class ProjectController {
     private TaskServices taskServices;
 
 
+
+    @GetMapping(path = "/myProjects")
+    public ResponseEntity<?> getProjects(){
+        UserModel user = Auth.user();
+
+
+        return ResponseEntity.ok(projectService.convertModelsToDTOInProject(userProjectRepository.getProjectsFromUser(user.getUserId())));
+    }
+
+
     @GetMapping(path = "/{project_id}")
     public ResponseEntity<?> getProject(@PathVariable Integer project_id){
         UserModel user = Auth.user();
@@ -54,8 +64,9 @@ public class ProjectController {
                     userProjectRepository.getUsersFromProject(project_id).size());
         }
 
-        return ResponseEntity.ok(new ProjectDTO(projectRepository.findByProjectId(project_id)));
+        return ResponseEntity.ok(new ProjectDTO(projectRepository.findByProjectId(project_id),userProjectRepository.findRolesByUserAndProject(user.getUserId(),project_id)));
     }
+
 
     @PostMapping(path = "/create")
     public ResponseEntity<String> createProject(@RequestBody ProjectDTO projectDTO){
@@ -86,6 +97,10 @@ public class ProjectController {
 
         if(!projectRepository.existsById(project_id.longValue())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Project dont exists");
+        }
+
+        if(!userProjectRepository.getUserProjects(inviteDTO.getEmail(),inviteDTO.getProject_id()).isEmpty()){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User already in project" + userProjectRepository.getUserProjects(inviteDTO.getEmail(),inviteDTO.getProject_id()).isEmpty());
         }
 
         ProjectModel project = projectRepository.findByProjectId(project_id);
@@ -174,6 +189,7 @@ public class ProjectController {
         userProjectRepository.deleteByUserIdAndProjectId(
                 user_id,project_id
         );
+        userProjectRepository.deleteAll(userProjectRepository.getUserProjects(user_id,project_id));
         return ResponseEntity.ok("Deleted user");
     }
 

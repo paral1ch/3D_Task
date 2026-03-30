@@ -2,11 +2,13 @@ package com.example._d_task.models;
 
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.Collection;
 
 @Entity
 @Table(name = "projects")
+@Data
 public class ProjectModel {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
