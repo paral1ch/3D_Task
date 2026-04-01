@@ -1,15 +1,18 @@
 package com.example._d_task.controllers;
 
+import com.example._d_task.dto.ChangePasswordDTO;
 import com.example._d_task.dto.UserDTO;
-import com.example._d_task.security.Classes.Auth;
-import com.example._d_task.services.UserService;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.SessionRepository;
 import com.example._d_task.repositories.UserRepository;
+import com.example._d_task.security.Classes.Auth;
+import com.example._d_task.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping(path="/Users")
@@ -65,5 +68,16 @@ public class UserController {
         origUser.setFullName(user.getFullname());
         userRepository.save(origUser);
         return ResponseEntity.ok("Saved");
+    }
+
+    @PostMapping(path = "/profile/changePassword")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordDTO pass){
+        if(!Objects.equals(Auth.user().getPashHash(), pass.getOldPassword())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error");
+        }
+
+        Auth.user().setPassHash(pass.getNewPassword());
+        userRepository.save(Auth.user());
+        return ResponseEntity.ok("Password changed");
     }
 }

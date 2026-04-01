@@ -51,7 +51,7 @@ public class UserDTO {
     }
 
     public List<ProjectRoles> getRoles() {
-        return roles;
+        return this.roles;
     }
 
     public void setRoles(List<ProjectRoles> roles) {
@@ -70,10 +70,6 @@ public class UserDTO {
     }
     public void setDisplay_name(String display_name) {
         this.username = display_name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public void setName(String name) {

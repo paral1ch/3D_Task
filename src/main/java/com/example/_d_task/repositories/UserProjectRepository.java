@@ -26,6 +26,9 @@ public interface UserProjectRepository extends JpaRepository<UserProjectModel, L
     @Query("SELECT pm FROM ProjectModel as pm where pm.user_id in (SELECT DISTINCT upm.user.user_id FROm UserProjectModel as upm where upm.user.user_id = :user_id)")
     List<ProjectModel> getProjectsFromUser(@Param("user_id") Integer user_id);
 
+    @Query("SELECT upm.project FROM UserProjectModel as upm WHERE upm.user.user_id = :user_id")
+    List<ProjectModel> getUserProjects(@Param("user_id") Integer user_id);
+
     @Query("SELECT upm FROM UserProjectModel as upm where :user_id = upm.user.user_id and :project_id = upm.project.project_id")
     List<UserProjectModel> getUserProjects(@Param("user_id") Integer user_id, @Param("project_id") Integer project_id);
 

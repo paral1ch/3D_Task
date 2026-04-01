@@ -33,6 +33,9 @@ public class ProjectModel {
     @OneToMany(mappedBy = "project",cascade = CascadeType.ALL, orphanRemoval = true)
     private Collection<TaskModel> tasks;
 
+    @OneToMany(mappedBy = "project",cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<ProjectNotificationModel> notifications;
+
     public ProjectModel(){}
 
 

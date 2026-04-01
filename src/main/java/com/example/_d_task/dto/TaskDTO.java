@@ -7,6 +7,7 @@ import lombok.Data;
 import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class TaskDTO {
@@ -27,6 +28,15 @@ public class TaskDTO {
     @Nullable
     @JsonFormat(pattern = "dd.MM.yyyy")
     private LocalDate deadline;
+
+    @Nullable
+    private List<UserDTO> verifiers;
+
+    @Nullable
+    private List<UserDTO> executors;
+
+    @Nullable
+    private List<CommentDTO> comments;
 
     public TaskDTO(){}
 

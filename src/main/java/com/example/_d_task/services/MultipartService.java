@@ -4,9 +4,11 @@ package com.example._d_task.services;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
+import com.example._d_task.dto.UploadedPartDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -49,4 +51,39 @@ public class MultipartService {
         s3Client.abortMultipartUpload(request);
     }
 
+
+    public String generatePresignedDownloadUrl(String key, int expirationMinutes) {
+        Date expiration = new Date(System.currentTimeMillis() + expirationMinutes * 60_000L);
+        GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, key)
+                .withMethod(HttpMethod.GET)
+                .withExpiration(expiration);
+        return s3Client.generatePresignedUrl(request).toString();
+    }
+
+    public List<UploadedPartDTO> listUploadedParts(String key, String uploadId) {
+        List<UploadedPartDTO> result = new ArrayList<>();
+
+        ListPartsRequest request = new ListPartsRequest(bucketName, key, uploadId);
+        PartListing listing;
+
+        do {
+            listing = s3Client.listParts(request);
+
+            for (PartSummary part : listing.getParts()) {
+                result.add(
+                        new UploadedPartDTO(
+                                part.getPartNumber(),
+                                part.getETag(),
+                                part.getSize()
+                        )
+                );
+            }
+
+            if (listing.isTruncated()) {
+                request.setPartNumberMarker(listing.getNextPartNumberMarker());
+            }
+        } while (listing.isTruncated());
+
+        return result;
+    }
 }

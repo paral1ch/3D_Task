@@ -1,12 +1,14 @@
 package com.example._d_task.controllers;
 
 
+import com.example._d_task.dto.CommentDTO;
 import com.example._d_task.dto.TaskDTO;
 import com.example._d_task.dto.UserDTO;
 import com.example._d_task.enums.ProjectRolePermissions;
-import com.example._d_task.repositories.ProjectRepository;
-import com.example._d_task.repositories.TaskRepository;
-import com.example._d_task.repositories.UserProjectRepository;
+import com.example._d_task.enums.ProjectRoles;
+import com.example._d_task.models.TaskCommentModel;
+import com.example._d_task.models.TaskModel;
+import com.example._d_task.repositories.*;
 import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.services.ProjectServices;
 import com.example._d_task.services.TaskServices;
@@ -34,6 +36,11 @@ public class TaskController {
 
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TaskCommentRepository taskCommentRepository;
 
     @PostMapping(path = "/create")
     public ResponseEntity<?> createTask(@RequestBody TaskDTO taskDTO, @PathVariable Integer project_id){
@@ -114,6 +121,55 @@ public class TaskController {
         return ResponseEntity.ok("Executor set" + verifier);
     }
 
+    @GetMapping("/{task_id}/getVerifiers")
+    public ResponseEntity<?> getVerifiers(@PathVariable("project_id") Integer project_id,
+                                          @PathVariable("task_id") Integer task_id){
 
+        return ResponseEntity.ok(taskRepository.getVerifiers(task_id));
+    }
+
+    @GetMapping("/{task_id}/getExecutors")
+    public ResponseEntity<?> getExecutors(@PathVariable("project_id") Integer project_id,
+                                          @PathVariable("task_id") Integer task_id){
+
+        return ResponseEntity.ok(taskRepository.getExecutors(task_id));
+    }
+
+    @PostMapping("/{task_id}/setStatus")
+    public ResponseEntity<?> setStatus(@PathVariable("project_id") Integer project_id,
+                                       @PathVariable("task_id") Integer task_id,
+                                       @RequestBody TaskDTO taskDTO){
+
+        if(!userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id).contains(ProjectRoles.CREATOR) &&
+        taskRepository.findVerifierModel(task_id,Auth.user().getUserId())==null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+        }
+
+
+
+        TaskModel task = taskRepository.findById(task_id);
+        task.setStatus(taskDTO.getStatus());
+        taskRepository.save(task);
+
+        return ResponseEntity.ok("Status " +taskDTO.getStatus() + " stated");
+    }
+
+
+    @PostMapping("/{task_id}/addComment")
+    public ResponseEntity<?> addComment(@PathVariable("task_id") Integer task_id, @PathVariable("project_id") Integer project_id,
+                                        @RequestBody CommentDTO commentDTO){
+
+        if(!taskServices.canAddComments(task_id)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+        }
+
+        TaskCommentModel comment = new TaskCommentModel();
+        comment.setTask(taskRepository.findById(commentDTO.getTask_id()));
+        comment.setText(commentDTO.getText());
+        comment.setUser(userRepository.findById(Auth.user().getUserId()));
+        taskCommentRepository.save(comment);
+
+        return ResponseEntity.ok("Comment created" + commentDTO);
+    }
 
 }

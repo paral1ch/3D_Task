@@ -10,6 +10,7 @@ import com.example._d_task.security.Classes.Auth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,19 @@ public class TaskServices {
     @Autowired
     private TaskVerifierRepository taskVerifierRepository;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private TaskCommentRepository taskCommentRepository;
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private UserProjectRepository userProjectRepository;
+
+    @Autowired
+    private ProjectServices projectServices;
     public void createTask(Integer project_id, TaskDTO taskDTO){
         TaskModel task = new TaskModel();
         task.setName(taskDTO.getName());
@@ -64,7 +78,18 @@ public class TaskServices {
         dto.setUser_id(task.getUser().getUserId());
         dto.setProject_id(task.getProject().getProject_id());
         dto.setParent_task_id(task.getParent_task_id());
+        dto.setVerifiers(userService.convertModelsToDTO(taskRepository.getVerifiers(dto.getTask_id())));
+        dto.setExecutors(userService.convertModelsToDTO(taskRepository.getExecutors(dto.getTask_id())));
+        dto.setComments(commentService.convertModelsToDTO(taskCommentRepository.getComments(task.getTask_id())));
         return dto;
+    }
+
+    public List<TaskDTO> tasksToDTO(List<TaskModel> tasks){
+        List<TaskDTO> list = new ArrayList<>();
+        for(TaskModel task :tasks){
+            list.add(taskToDTO(task));
+        }
+        return list;
     }
 
     public TaskExecutorModel setExecutor(Integer task_id,Integer user_id){
@@ -94,5 +119,17 @@ public class TaskServices {
                         task.getStatus(),
                         task.getDeadline())
         ).collect(Collectors.toList());
+    }
+
+    public boolean canAddComments(Integer task_id){
+        TaskModel task = taskRepository.findById(task_id);
+
+        if(!taskRepository.getExecutors(task_id).contains(Auth.user()) &&
+            !taskRepository.getVerifiers(task_id).contains(Auth.user()) &&
+            !projectServices.canModifyTasks(task.getProject().getProject_id())){
+            return false;
+
+        }
+        return true;
     }
 }

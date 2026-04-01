@@ -14,9 +14,11 @@ public class TaskCommentModel {
     private Integer comment_id;
 
     @ManyToOne
+    @JoinColumn(name = "task_id")
     private TaskModel task;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private UserModel user;
 
     @Column(name = "text")

@@ -13,7 +13,7 @@ public class UploadDTO {
 
     @Nullable
     private Integer taskId;
-
-
+    @Nullable
+    private String key;
 
 }
