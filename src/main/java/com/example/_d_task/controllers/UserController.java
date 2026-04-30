@@ -46,9 +46,9 @@ public class UserController {
     }
 
     @GetMapping(path = "/userByToken")
-    public @ResponseBody ResponseEntity<String> test(@RequestHeader("Authorization") String header){
+    public @ResponseBody ResponseEntity<UserDTO> test(@RequestHeader("Authorization") String header){
         String token = header.substring(7);
-        return ResponseEntity.ok(sessionRepository.findUserByToken(token).getUserId().toString());
+        return ResponseEntity.ok(sessionRepository.findUserByToken(token).getUserDTO());
     }
 
 

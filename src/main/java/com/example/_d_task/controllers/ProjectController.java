@@ -59,7 +59,7 @@ public class ProjectController {
     public ResponseEntity<?> getProjects(){
         UserModel user = Auth.user();
 
-        log.info(projectService.convertModelsToDTOInProject(userProjectRepository.getProjectsFromUser(user.getUserId())).toString());
+        //log.info(projectService.convertModelsToDTOInProject(userProjectRepository.getProjectsFromUser(user.getUserId())).toString());
 
 
         return ResponseEntity.ok(projectService.convertModelsToDTOInProject(userProjectRepository.getUserProjects(user.getUserId())));
@@ -86,7 +86,7 @@ public class ProjectController {
         ProjectModel project = projectService.createProjectFromDTO(projectDTO);
         projectService.createUserProjectFrom(project);
 
-        return ResponseEntity.ok("заебись");
+        return ResponseEntity.ok("Сделано");
     }
 
     @PostMapping(path = "/invite")
@@ -260,9 +260,13 @@ public class ProjectController {
             hashMap.put(status.name(),0);
         };
         hashMap.put("STATUS_SUM",0);
+        hashMap.put("OUTDATED",0);
         List<TaskModel> tasks = projectRepository.findTasks(project_id);
         for(TaskModel task: tasks) {
             hashMap.put(task.getStatus().name(), hashMap.get(task.getStatus().name())+1);
+            //if(!task.getDeadline().isAfter(LocalDate.now())){
+                //    hashMap.put("OUTDATED",hashMap.get("OUTDATED")+1);
+                //}
             hashMap.put("STATUS_SUM", hashMap.get("STATUS_SUM")+1);
         }
         return ResponseEntity.ok(hashMap);
@@ -324,5 +328,7 @@ public class ProjectController {
         List<NotificationDTO> list = notificationService.convertModelsToDTO(notList);
         return ResponseEntity.ok(list);
     }
+
+
 
 }

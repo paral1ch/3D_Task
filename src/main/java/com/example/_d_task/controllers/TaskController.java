@@ -6,6 +6,7 @@ import com.example._d_task.dto.TaskDTO;
 import com.example._d_task.dto.UserDTO;
 import com.example._d_task.enums.ProjectRolePermissions;
 import com.example._d_task.enums.ProjectRoles;
+import com.example._d_task.enums.TaskEnum;
 import com.example._d_task.models.TaskCommentModel;
 import com.example._d_task.models.TaskModel;
 import com.example._d_task.repositories.*;
@@ -41,6 +42,12 @@ public class TaskController {
 
     @Autowired
     private TaskCommentRepository taskCommentRepository;
+
+    @Autowired
+    private TaskVerifierRepository taskVerifierRepository;
+
+    @Autowired
+    private TaskExecutorRepository taskExecutorRepository;
 
     @PostMapping(path = "/create")
     public ResponseEntity<?> createTask(@RequestBody TaskDTO taskDTO, @PathVariable Integer project_id){
@@ -121,6 +128,46 @@ public class TaskController {
         return ResponseEntity.ok("Executor set" + verifier);
     }
 
+    @PostMapping("/{task_id}/deleteExecutor")
+    public ResponseEntity<?> deleteExecutor(@PathVariable("project_id") Integer project_id,
+                                         @PathVariable("task_id") Integer task_id,
+                                         @RequestBody UserDTO executor){
+
+        if(!projectServices.canModifyTasks(project_id)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+        }
+        if(userProjectRepository.findRolesByUserAndProject(executor.getUserId(),project_id)==null){
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No such user in this project");
+        }
+        if(executor.getUserId()==null){
+            return  ResponseEntity.status(HttpStatus.FORBIDDEN).body(executor);
+        }
+
+        taskExecutorRepository.deleteExecutor(task_id,executor.getUserId());
+
+        return ResponseEntity.ok("Executor deleted" + executor);
+    }
+
+    @PostMapping("/{task_id}/deleteVerifier")
+    public ResponseEntity<?> deleteVerifier(@PathVariable("project_id") Integer project_id,
+                                         @PathVariable("task_id") Integer task_id,
+                                         @RequestBody UserDTO verifier){
+
+        if(!projectServices.canModifyTasks(project_id)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+        }
+        if(userProjectRepository.findRolesByUserAndProject(verifier.getUserId(),project_id)==null){
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("No such user in this project");
+        }
+
+
+        taskVerifierRepository.deleteVerifier(task_id,verifier.getUserId());
+
+        return ResponseEntity.ok("Executor deleted" + verifier);
+    }
+
     @GetMapping("/{task_id}/getVerifiers")
     public ResponseEntity<?> getVerifiers(@PathVariable("project_id") Integer project_id,
                                           @PathVariable("task_id") Integer task_id){
@@ -135,10 +182,26 @@ public class TaskController {
         return ResponseEntity.ok(taskRepository.getExecutors(task_id));
     }
 
+    @PostMapping("/{task_id}/needReview")
+    public ResponseEntity<?> needReview(@PathVariable("project_id") Integer project_id,
+                                        @PathVariable("task_id") Integer task_id){
+        if(!taskRepository.getExecutors(task_id).contains(Auth.user())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+
+        TaskModel task = taskRepository.findById(task_id);
+        task.setStatus(TaskEnum.NEED_REVIEW);
+        taskRepository.save(task);
+
+        return ResponseEntity.ok(taskServices.taskToDTO(task));
+    }
+
     @PostMapping("/{task_id}/setStatus")
     public ResponseEntity<?> setStatus(@PathVariable("project_id") Integer project_id,
                                        @PathVariable("task_id") Integer task_id,
                                        @RequestBody TaskDTO taskDTO){
+
+
 
         if(!userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id).contains(ProjectRoles.CREATOR) &&
         taskRepository.findVerifierModel(task_id,Auth.user().getUserId())==null){
@@ -171,5 +234,26 @@ public class TaskController {
 
         return ResponseEntity.ok("Comment created" + commentDTO);
     }
+
+    @PostMapping("/{task_id}/editTask")
+    public ResponseEntity<?> editTask(@PathVariable("task_id") Integer task_id,@PathVariable("project_id") Integer project_id, @RequestBody TaskDTO dto){
+
+        if(!ProjectRolePermissions.canModifyProject(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id)) ||
+                !ProjectRolePermissions.canCreateTask(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id))){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+        }
+
+        TaskModel task = taskRepository.findById(task_id);
+
+        task.setName(dto.getName());
+        task.setDeadline(dto.getDeadline());
+        task.setDescription(dto.getDescription());
+        taskRepository.save(task);
+
+        return ResponseEntity.ok("Task edited");
+    }
+
+
+
 
 }

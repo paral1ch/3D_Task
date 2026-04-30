@@ -16,4 +16,9 @@ public class UploadDTO {
     @Nullable
     private String key;
 
+    @Nullable
+    private Integer asset_id;
+
+    @Nullable
+    private Integer version_id;
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
 @Entity
 @Table(name = "file_metadata")
@@ -19,12 +20,23 @@ public class FileMetadataModel {
 
     private String upload_id;
 
+    private Integer asset_id;
+    private Integer version;
+    private Boolean verifier_file;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserModel user;
+
     @ManyToOne
     @JoinColumn(name = "task_id")
     private TaskModel task;
     private String file_name;
     @Enumerated(EnumType.STRING)
     private FileStatus status;
+
+    @OneToMany(mappedBy = "file",cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<FileAnnotationsModel> annotations;
 
     private LocalDate created_at;
 

@@ -10,13 +10,11 @@ import com.example._d_task.enums.ProjectRolePermissions;
 import com.example._d_task.enums.ProjectRoles;
 import com.example._d_task.models.FileMetadataModel;
 import com.example._d_task.models.ProjectModel;
-import com.example._d_task.repositories.FileMetadataRepository;
-import com.example._d_task.repositories.ProjectRepository;
-import com.example._d_task.repositories.TaskRepository;
-import com.example._d_task.repositories.UserProjectRepository;
+import com.example._d_task.repositories.*;
 import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.services.MultipartService;
 import com.example._d_task.services.TaskServices;
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,13 +43,19 @@ public class FilesController {
     private UserProjectRepository userProjectRepository;
     @Autowired
     private ProjectRepository projectRepository;
-
     @Autowired
     private TaskServices taskServices;
+    @Autowired
+    private FileAnnotationsRepository fileAnnotationsRepository;
 
     private final Integer URL_LIFESPAN = 15;
 
+    private static final Logger log = Logger.getLogger(
+            FilesController.class.getName()
+    );
+
     @PostMapping("/upload")
+    @Transactional
     public ResponseEntity<?> initiateUpload(
             @RequestBody UploadDTO uploadDTO){
         ProjectModel pm = projectRepository.findByTaskId(uploadDTO.getTaskId());
@@ -57,14 +63,16 @@ public class FilesController {
         if(pm==null){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("no such project");
         }
-
-        if(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
+        Boolean isCreator = userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
                 pm.getProject_id())==null || !ProjectRolePermissions.canCreateTask(
                 userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
-                        pm.getProject_id())
-        )){
+                        pm.getProject_id()));
+        Boolean isVerifierOrExecutor = taskRepository.getExecutors(uploadDTO.getTaskId()).contains(Auth.user()) ||
+                taskRepository.getVerifiers(uploadDTO.getTaskId()).contains(Auth.user());
+        if(!isCreator && !isVerifierOrExecutor)
+        {
 
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights " + isCreator + " " + isVerifierOrExecutor);
         }
 
         String key = String.format("tasks/%d/%s_%s", uploadDTO
@@ -76,6 +84,31 @@ public class FilesController {
         file.setTask(taskRepository.findById(uploadDTO.getTaskId()));
         file.setS3key(key);
         file.setFile_name(uploadDTO.getFileName());
+        file.setVerifier_file(taskRepository.getVerifiers(uploadDTO.getTaskId()).contains(Auth.user()));
+        file.setUser(Auth.user());
+        Integer requestedAssetId = uploadDTO.getAsset_id();
+        if(requestedAssetId != null){
+            List<FileMetadataModel> assetFiles = fileMetadataRepository.findByAssetIdForUpdate(requestedAssetId);
+            if(assetFiles == null || assetFiles.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("asset not found");
+            }
+            Integer assetTaskId = assetFiles.get(0).getTask().getTask_id();
+            if(!Objects.equals(assetTaskId, uploadDTO.getTaskId())){
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("asset belongs to another task");
+            }
+            int lastVersion = assetFiles.stream()
+                    .map(FileMetadataModel::getVersion)
+                    .filter(Objects::nonNull)
+                    .max(Integer::compareTo)
+                    .orElse(0);
+            file.setAsset_id(requestedAssetId);
+            file.setVersion(lastVersion + 1);
+        } else {
+            Integer newAssetId = fileMetadataRepository.nextAssetId();
+            file.setAsset_id(newAssetId);
+            file.setVersion(1);
+        }
+
         fileMetadataRepository.save(file);
         return ResponseEntity.ok(new InitiateUploadResponse(uploadId,key,file.getFile_id()));
     }
@@ -146,12 +179,72 @@ public class FilesController {
             dto.setCreated_at(file.getCreated_at());
             dto.setUpdated_at(file.getUpdated_at());
             dto.setUpload_id(file.getUpload_id());
+            dto.setS3Key(file.getS3key());
+            log.info(dto.getS3Key());
+            dto.setVerifier_file(taskRepository.getVerifiers(taskId).contains(file.getUser()));
+            dto.setUser(file.getUser().getUserDTO());
+            dto.setVersion(file.getVersion());
+            dto.setAsset_id(file.getAsset_id());
             return dto;
         }).toList();
 
         return ResponseEntity.ok(files);
     }
 
+    @GetMapping("/{asset_id}/getVersions")
+    public ResponseEntity<?> getVersions(@PathVariable("asset_id") Integer asset_id){
+        List<FileMetadataModel> versionFiles = fileMetadataRepository.findVersionsByAssetId(asset_id);
+        if(versionFiles == null || versionFiles.isEmpty()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("asset not found");
+        }
+        Integer taskId = versionFiles.get(0).getTask().getTask_id();
+        Boolean isVerifierOrExecutor = taskRepository.getExecutors(taskId).contains(Auth.user()) ||
+                taskRepository.getVerifiers(taskId).contains(Auth.user());
+        if(!isVerifierOrExecutor){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+
+        List<FileDTO> files = versionFiles.stream().map(file ->{
+            FileDTO dto = new FileDTO();
+            dto.setFile_id(file.getFile_id());
+            dto.setFile_name(file.getFile_name());
+            dto.setTask_id(file.getTask().getTask_id());
+            dto.setStatus(file.getStatus());
+            dto.setCreated_at(file.getCreated_at());
+            dto.setUpdated_at(file.getUpdated_at());
+            dto.setUpload_id(file.getUpload_id());
+            dto.setS3Key(file.getS3key());
+            log.info(dto.getS3Key());
+            dto.setVerifier_file(taskRepository.getVerifiers(file.getTask().getTask_id()).contains(file.getUser()));
+            dto.setUser(file.getUser().getUserDTO());
+            dto.setVersion(file.getVersion());
+            dto.setAsset_id(file.getAsset_id());
+            return dto;
+        }).toList();
+
+
+
+        return ResponseEntity.ok(files);
+    }
+
+    @DeleteMapping("/{project_id}/delete")
+    public ResponseEntity<?> deleteFile(@RequestBody FileDTO file, @PathVariable("project_id") Integer project_id){
+        boolean isCreator = ProjectRolePermissions.canCreateTask(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id));
+        log.info(file.getS3Key());
+        if(file.getS3Key()== null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("empty key" + file.getFile_name());
+        }
+        FileMetadataModel fileOrig = fileMetadataRepository.findByFileS3Key(file.getS3Key());
+
+        if(!Objects.equals(fileOrig.getUser().getEmail(), Auth.user().getEmail()) && !isCreator){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights" + isCreator + " " + fileOrig.getUser().getEmail());
+        }
+
+        multipartService.deleteAnnotationsForFile(fileOrig.getFile_id());
+        multipartService.deleteFile(file.getS3Key());
+        fileMetadataRepository.delete(fileMetadataRepository.findByFileS3Key(file.getS3Key()));
+        return ResponseEntity.ok("deleted");
+    }
     @GetMapping("/{fileId}/download")
     public ResponseEntity<?> getDownloadUrl(@PathVariable Integer fileId) {
         FileMetadataModel file = fileMetadataRepository.findByFileId(fileId);
@@ -220,6 +313,70 @@ public class FilesController {
         return ResponseEntity.ok(parts);
     }
 
+    @GetMapping("/{file_id}/annotations/get")
+    public ResponseEntity<?> getAnnotations(
+            @PathVariable("file_id") Integer file_id,
+            @RequestParam(name = "include_payload", defaultValue = "true") boolean includePayload){
+        FileMetadataModel file = fileMetadataRepository.findByFileId(file_id);
+        if (file == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such file");
+        }
+        Integer task_id = file.getTask().getTask_id();
+        if(!taskServices.canAddComments(task_id)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        var annotations = fileAnnotationsRepository.getAnnotationsByFileId(file_id);
+        if (includePayload) {
+            return ResponseEntity.ok(multipartService.modelsToDTO(annotations));
+        }
+        return ResponseEntity.ok(multipartService.modelsToMetaDTO(annotations));
+    }
+
+    @GetMapping("/annotations/{annotation_id}/download")
+    public ResponseEntity<?> getAnnotationDownloadUrl(@PathVariable("annotation_id") Integer annotation_id) {
+        var annotation = fileAnnotationsRepository.findByAnnotationId(annotation_id);
+        if (annotation == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such annotation");
+        }
+        if (!taskServices.canAddComments(annotation.getFile().getTask().getTask_id())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        String key = annotation.getS3Key();
+        if (key == null || key.isBlank()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("annotation payload is missing");
+        }
+        String url = multipartService.generatePresignedDownloadUrl(key, URL_LIFESPAN);
+        return ResponseEntity.ok(url);
+    }
+
+    @DeleteMapping("/annotations/{annotation_id}")
+    public ResponseEntity<?> deleteAnnotation(@PathVariable("annotation_id") Integer annotation_id) {
+        var annotation = fileAnnotationsRepository.findByAnnotationId(annotation_id);
+        if (annotation == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such annotation");
+        }
+        if (!taskServices.canAddComments(annotation.getFile().getTask().getTask_id())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        if (annotation.getS3Key() != null && !annotation.getS3Key().isBlank()) {
+            multipartService.deleteFile(annotation.getS3Key());
+        }
+        fileAnnotationsRepository.delete(annotation);
+        return ResponseEntity.ok("annotation deleted");
+    }
+
+    @PostMapping("/annotations/add")
+    public ResponseEntity<?> addAnnotations(@RequestBody List<AnnotationCreateRequest> items){
+
+        if(items==null || items.isEmpty()){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("items is empty");
+        }
+
+        return multipartService.createBatch(items);
+    }
+
+
+
     @Data
     public static class InitiateUploadResponse {
         private final String upload_id;
@@ -238,5 +395,10 @@ public class FilesController {
         private int partNumber;
         private String etag;
     }
-
+    public record AnnotationCreateRequest(
+            Integer fileId,
+            String annotationType,
+            String status,
+            Object payload
+    ) {}
 }

@@ -78,6 +78,7 @@ public class TaskServices {
         dto.setUser_id(task.getUser().getUserId());
         dto.setProject_id(task.getProject().getProject_id());
         dto.setParent_task_id(task.getParent_task_id());
+        dto.setDeadline(task.getDeadline());
         dto.setVerifiers(userService.convertModelsToDTO(taskRepository.getVerifiers(dto.getTask_id())));
         dto.setExecutors(userService.convertModelsToDTO(taskRepository.getExecutors(dto.getTask_id())));
         dto.setComments(commentService.convertModelsToDTO(taskCommentRepository.getComments(task.getTask_id())));
