@@ -5,6 +5,8 @@ import com.example._d_task.models.Id.TaskVerifierId;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "task_verifier")
 @Data
@@ -20,5 +22,6 @@ public class TaskVerifierModel {
     @JoinColumn(name = "task_id")
     private TaskModel task;
 
-
+    @Column(name = "assigned_at")
+    private LocalDate assigned_at;
 }

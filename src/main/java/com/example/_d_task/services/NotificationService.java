@@ -31,6 +31,10 @@ public class NotificationService {
         dto.setText(notification.getText());
         dto.setDate(notification.getDate());
         dto.setCreated_by(userService.convertModelToDTO(notification.getUser()));
+        dto.setReaded(notification.getReaded());
+        if(notification.getAdressed_to() != null){
+            dto.setAdressed_to(notification.getAdressed_to().getUserDTO());
+        }
 
         return dto;
     }

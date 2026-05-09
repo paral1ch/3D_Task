@@ -9,6 +9,7 @@ import com.example._d_task.enums.FileStatus;
 import com.example._d_task.enums.ProjectRolePermissions;
 import com.example._d_task.enums.ProjectRoles;
 import com.example._d_task.models.FileMetadataModel;
+import com.example._d_task.models.ProjectFilesModel;
 import com.example._d_task.models.ProjectModel;
 import com.example._d_task.repositories.*;
 import com.example._d_task.security.Classes.Auth;
@@ -36,6 +37,8 @@ public class FilesController {
 
     @Autowired
     private FileMetadataRepository fileMetadataRepository;
+    @Autowired
+    private ProjectFilesRepository projectFilesRepository;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -189,6 +192,198 @@ public class FilesController {
         }).toList();
 
         return ResponseEntity.ok(files);
+    }
+
+    @PostMapping("/project/{project_id}/upload")
+    public ResponseEntity<?> initiateProjectUpload(
+            @PathVariable("project_id") Integer project_id,
+            @RequestBody UploadDTO uploadDTO
+    ) {
+        ProjectModel project = projectRepository.findByProjectId(project_id);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such project");
+        }
+
+        List<ProjectRoles> roles = userProjectRepository.findRolesByUserAndProject(
+                Auth.user().getUserId(),
+                project_id
+        );
+        if (roles == null || !ProjectRolePermissions.canCreateTask(roles)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+
+        if (uploadDTO == null || uploadDTO.getFileName() == null || uploadDTO.getFileName().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("fileName is required");
+        }
+
+        String contentType = uploadDTO.getContentType() == null || uploadDTO.getContentType().isBlank()
+                ? "application/octet-stream"
+                : uploadDTO.getContentType();
+        String fileName = uploadDTO.getFileName().trim();
+        String key = String.format(
+                "projects/%d/%s_%s",
+                project_id,
+                UUID.randomUUID(),
+                fileName
+        );
+        String uploadId = multipartService.initiateMultipartUpload(key, contentType);
+        return ResponseEntity.ok(new InitiateUploadResponse(uploadId, key, null));
+    }
+
+    @GetMapping("/project/{project_id}/upload/{upload_id}/parts/{part_number}")
+    public ResponseEntity<?> getProjectPresignedPartUrl(
+            @PathVariable("project_id") Integer project_id,
+            @PathVariable("upload_id") String upload_id,
+            @PathVariable("part_number") Integer part_number,
+            @RequestParam("key") String key
+    ) {
+        if (!canUploadProjectFiles(project_id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        if (!isProjectFileKeyValid(project_id, key)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("invalid key");
+        }
+
+        String url = multipartService.generatePresignedUrlForPart(
+                key,
+                upload_id,
+                part_number,
+                URL_LIFESPAN
+        );
+        return ResponseEntity.ok(url);
+    }
+
+    @GetMapping("/project/{project_id}/uploads/{uploadId}/parts")
+    public ResponseEntity<?> getProjectUploadedParts(
+            @PathVariable("project_id") Integer project_id,
+            @PathVariable("uploadId") String uploadId,
+            @RequestParam("key") String key
+    ) {
+        if (!canUploadProjectFiles(project_id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        if (!isProjectFileKeyValid(project_id, key)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("invalid key");
+        }
+
+        List<UploadedPartDTO> parts = multipartService.listUploadedParts(key, uploadId);
+        return ResponseEntity.ok(parts);
+    }
+
+    @PostMapping("/project/{project_id}/uploads/{uploadId}/complete")
+    public ResponseEntity<?> completeProjectUpload(
+            @PathVariable("project_id") Integer project_id,
+            @PathVariable String uploadId,
+            @RequestBody CompleteUploadRequest request
+    ) {
+        if (!canUploadProjectFiles(project_id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        if (request == null || request.getKey() == null || request.getKey().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("key is required");
+        }
+        if (!isProjectFileKeyValid(project_id, request.getKey())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("invalid key");
+        }
+        if (request.getParts() == null || request.getParts().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("parts are required");
+        }
+
+        List<PartETag> etags = request.getParts().stream()
+                .map(p -> new PartETag(p.getPartNumber(), p.getEtag()))
+                .collect(Collectors.toList());
+        multipartService.completeMultipartUpload(request.getKey(), uploadId, etags);
+
+        ProjectModel project = projectRepository.findByProjectId(project_id);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such project");
+        }
+
+        ProjectFilesModel file = new ProjectFilesModel();
+        file.setProject(project);
+        file.setS3key(request.getKey());
+        file.setFile_name(resolveProjectFileName(request.getFileName(), request.getKey()));
+        projectFilesRepository.save(file);
+
+        FileDTO dto = projectFileToDto(file);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/project/{project_id}/uploads/{uploadId}/abort")
+    public ResponseEntity<?> abortProjectUpload(
+            @PathVariable("project_id") Integer project_id,
+            @PathVariable String uploadId,
+            @RequestParam("key") String key
+    ) {
+        if (!canUploadProjectFiles(project_id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        if (!isProjectFileKeyValid(project_id, key)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("invalid key");
+        }
+        multipartService.abortMultipartUpload(key, uploadId);
+        return ResponseEntity.ok("Upload aborted");
+    }
+
+    @GetMapping("/project/{project_id}")
+    public ResponseEntity<?> getProjectFiles(@PathVariable("project_id") Integer project_id) {
+        ProjectModel project = projectRepository.findByProjectId(project_id);
+        if (project == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such project");
+        }
+
+        List<ProjectRoles> roles = userProjectRepository.findRolesByUserAndProject(
+                Auth.user().getUserId(),
+                project_id
+        );
+        if (roles == null || roles.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+
+        List<FileDTO> files = projectFilesRepository.findByProjectId(project_id).stream()
+                .map(this::projectFileToDto)
+                .toList();
+        return ResponseEntity.ok(files);
+    }
+
+    @GetMapping("/project/{project_id}/{file_id}/download")
+    public ResponseEntity<?> getProjectFileDownloadUrl(
+            @PathVariable("project_id") Integer project_id,
+            @PathVariable("file_id") Integer file_id
+    ) {
+        ProjectFilesModel file = projectFilesRepository.findByFileIdAndProjectId(file_id, project_id);
+        if (file == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such file");
+        }
+
+        List<ProjectRoles> roles = userProjectRepository.findRolesByUserAndProject(
+                Auth.user().getUserId(),
+                project_id
+        );
+        if (roles == null || roles.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+
+        String url = multipartService.generatePresignedDownloadUrl(file.getS3key(), URL_LIFESPAN);
+        return ResponseEntity.ok(url);
+    }
+
+    @DeleteMapping("/project/{project_id}/{file_id}")
+    public ResponseEntity<?> deleteProjectFile(
+            @PathVariable("project_id") Integer project_id,
+            @PathVariable("file_id") Integer file_id
+    ) {
+        if (!canUploadProjectFiles(project_id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        ProjectFilesModel file = projectFilesRepository.findByFileIdAndProjectId(file_id, project_id);
+        if (file == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such file");
+        }
+
+        multipartService.deleteFile(file.getS3key());
+        projectFilesRepository.delete(file);
+        return ResponseEntity.ok("deleted");
     }
 
     @GetMapping("/{asset_id}/getVersions")
@@ -375,6 +570,49 @@ public class FilesController {
         return multipartService.createBatch(items);
     }
 
+    private boolean canUploadProjectFiles(Integer projectId) {
+        if (projectId == null) {
+            return false;
+        }
+        List<ProjectRoles> roles = userProjectRepository.findRolesByUserAndProject(
+                Auth.user().getUserId(),
+                projectId
+        );
+        return roles != null && ProjectRolePermissions.canCreateTask(roles);
+    }
+
+    private boolean isProjectFileKeyValid(Integer projectId, String key) {
+        if (projectId == null || key == null || key.isBlank()) {
+            return false;
+        }
+        String expectedPrefix = "projects/" + projectId + "/";
+        return key.startsWith(expectedPrefix);
+    }
+
+    private FileDTO projectFileToDto(ProjectFilesModel file) {
+        FileDTO dto = new FileDTO();
+        dto.setFile_id(file.getFile_id());
+        dto.setFile_name(file.getFile_name());
+        dto.setStatus(FileStatus.COMPLETED);
+        dto.setS3Key(file.getS3key());
+        return dto;
+    }
+
+    private String resolveProjectFileName(String requestFileName, String key) {
+        if (requestFileName != null && !requestFileName.isBlank()) {
+            return requestFileName.trim();
+        }
+        if (key == null || key.isBlank()) {
+            return "project-file";
+        }
+        String raw = key.substring(key.lastIndexOf('/') + 1);
+        int separatorIndex = raw.indexOf('_');
+        if (separatorIndex >= 0 && separatorIndex < raw.length() - 1) {
+            return raw.substring(separatorIndex + 1);
+        }
+        return raw;
+    }
+
 
 
     @Data
@@ -387,6 +625,7 @@ public class FilesController {
     @Data
     public static class CompleteUploadRequest {
         private String key;
+        private String fileName;
         private List<PartInfo> parts;
     }
 

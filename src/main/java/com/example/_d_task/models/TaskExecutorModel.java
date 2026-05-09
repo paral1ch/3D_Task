@@ -5,6 +5,8 @@ import com.example._d_task.models.Id.TaskExecutorModelId;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "task_executor")
 @Data
@@ -20,5 +22,6 @@ public class TaskExecutorModel {
     @JoinColumn(name = "task_id")
     private TaskModel task;
 
-
+    @Column(name = "assigned_at")
+    private LocalDate assigned_at;
 }

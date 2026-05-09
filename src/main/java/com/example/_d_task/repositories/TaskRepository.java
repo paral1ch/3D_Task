@@ -2,6 +2,7 @@ package com.example._d_task.repositories;
 
 import com.example._d_task.models.TaskExecutorModel;
 import com.example._d_task.models.TaskModel;
+import com.example._d_task.models.TaskVerifierModel;
 import com.example._d_task.models.UserModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,7 +26,7 @@ public interface TaskRepository  extends JpaRepository<TaskModel, Long> {
     TaskExecutorModel findExecutorModel(@Param("task_id") Integer task_id, @Param("user_id") Integer user_id);
 
     @Query("SELECT tf FROM TaskVerifierModel as tf WHERE :task_id = tf.task.task_id AND tf.user.user_id = :user_id")
-    TaskExecutorModel findVerifierModel(@Param("task_id") Integer task_id, @Param("user_id") Integer user_id);
+    TaskVerifierModel findVerifierModel(@Param("task_id") Integer task_id, @Param("user_id") Integer user_id);
 
     @Query("SELECT tf.user FROM TaskVerifierModel as tf  where :task_id = tf.task.task_id")
     List<UserModel> getVerifiers(@Param("task_id") Integer task_id);

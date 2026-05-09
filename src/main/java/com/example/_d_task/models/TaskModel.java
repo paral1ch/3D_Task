@@ -42,6 +42,9 @@ public class TaskModel {
     @Column(name = "deadline")
     private LocalDate deadline;
 
+    @Column(name = "done_at")
+    private LocalDate done_at;
+
     @OneToMany(mappedBy = "task",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TaskExecutorModel> task_executors;
 

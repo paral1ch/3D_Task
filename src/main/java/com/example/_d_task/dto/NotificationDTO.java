@@ -2,6 +2,7 @@ package com.example._d_task.dto;
 
 
 import lombok.Data;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
 
@@ -16,4 +17,8 @@ public class NotificationDTO {
     private Integer project_id;
 
     private LocalDate date;
+    @Nullable
+    private UserDTO adressed_to;
+    @Nullable
+    private Boolean readed;
 }

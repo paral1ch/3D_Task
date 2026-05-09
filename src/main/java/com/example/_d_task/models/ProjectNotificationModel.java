@@ -28,4 +28,10 @@ public class ProjectNotificationModel {
     @Column(name = "date")
     private LocalDate date;
 
+    @ManyToOne
+    @JoinColumn(name = "adressed_to")
+    private UserModel adressed_to;
+
+    private Boolean readed;
+
 }
