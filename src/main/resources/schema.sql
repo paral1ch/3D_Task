@@ -1,0 +1,4 @@
+CREATE SEQUENCE IF NOT EXISTS file_metadata_asset_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    MINVALUE 1;

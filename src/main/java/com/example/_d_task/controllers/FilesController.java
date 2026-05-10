@@ -66,10 +66,11 @@ public class FilesController {
         if(pm==null){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("no such project");
         }
-        Boolean isCreator = userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
-                pm.getProject_id())==null || !ProjectRolePermissions.canCreateTask(
-                userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
-                        pm.getProject_id()));
+        List<ProjectRoles> roles = userProjectRepository.findRolesByUserAndProject(
+                Auth.user().getUserId(),
+                pm.getProject_id()
+        );
+        Boolean isCreator = roles != null && ProjectRolePermissions.canCreateTask(roles);
         Boolean isVerifierOrExecutor = taskRepository.getExecutors(uploadDTO.getTaskId()).contains(Auth.user()) ||
                 taskRepository.getVerifiers(uploadDTO.getTaskId()).contains(Auth.user());
         if(!isCreator && !isVerifierOrExecutor)

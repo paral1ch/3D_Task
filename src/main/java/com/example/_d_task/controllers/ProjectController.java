@@ -333,8 +333,11 @@ public class ProjectController {
 
     @GetMapping("/{project_id}/getNotifications")
     public ResponseEntity<?> getNotifications(@PathVariable("project_id")Integer project_id){
-        List<ProjectNotificationModel> notList = (List<ProjectNotificationModel>) projectRepository.findByProjectId(project_id).getNotifications();
+        //List<ProjectNotificationModel> notList = (List<ProjectNotificationModel>) projectRepository.findByProjectId(project_id).getNotifications();
+        List<ProjectNotificationModel> notList = projectNotificationRepository.getFromProject(project_id);
+
         List<NotificationDTO> list = notificationService.convertModelsToDTO(notList);
+        list.removeIf(dto -> dto.getAdressed_to() != null);
         return ResponseEntity.ok(list);
     }
 

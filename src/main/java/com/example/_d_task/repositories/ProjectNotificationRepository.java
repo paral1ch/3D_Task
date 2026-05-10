@@ -15,5 +15,6 @@ public interface ProjectNotificationRepository extends JpaRepository<ProjectNoti
 
     @Query("SELECT pnm FROM ProjectNotificationModel as pnm where pnm.notification_id = :notification_id")
     ProjectNotificationModel getNotificationById( @Param("notification_id") Integer notification_id);
-
+    @Query("SELECT pnm FROM ProjectNotificationModel as pnm where pnm.project.project_id = :project_id ")
+    List<ProjectNotificationModel> getFromProject(@Param("project_id") Integer project_id);
 }

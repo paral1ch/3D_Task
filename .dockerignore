@@ -1,0 +1,6 @@
+.git
+.idea
+target
+*.log
+hs_err_pid*
+README.md

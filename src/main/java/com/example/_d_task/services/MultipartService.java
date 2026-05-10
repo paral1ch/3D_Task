@@ -16,8 +16,8 @@ import com.example._d_task.repositories.FileMetadataRepository;
 import com.example._d_task.repositories.TaskRepository;
 import com.example._d_task.security.Classes.Auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,9 +32,9 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 @Service
-@RequiredArgsConstructor
 public class MultipartService {
     private final AmazonS3 s3Client;
+    private final AmazonS3 s3PresignClient;
     private final String bucketName;
     @Autowired
     private FileMetadataRepository fileMetadataRepository;
@@ -52,6 +52,17 @@ public class MultipartService {
             MultipartService.class.getName()
     );
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+
+    @Autowired
+    public MultipartService(
+            @Qualifier("s3Client") AmazonS3 s3Client,
+            @Qualifier("s3PresignClient") AmazonS3 s3PresignClient,
+            @Qualifier("bucketName") String bucketName
+    ) {
+        this.s3Client = s3Client;
+        this.s3PresignClient = s3PresignClient;
+        this.bucketName = bucketName;
+    }
 
 
     public String initiateMultipartUpload(String key, String contentType){
@@ -75,7 +86,7 @@ public class MultipartService {
                 .withContentType("application/octet-stream");
         request.addRequestParameter("uploadId",uploadId);
         request.addRequestParameter("partNumber",String.valueOf(partNumber));
-        return s3Client.generatePresignedUrl(request).toString();
+        return s3PresignClient.generatePresignedUrl(request).toString();
     }
 
     public void completeMultipartUpload(String key, String uploadId, List<PartETag> parts){
@@ -93,7 +104,7 @@ public class MultipartService {
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, key)
                 .withMethod(HttpMethod.GET)
                 .withExpiration(expiration);
-        return s3Client.generatePresignedUrl(request).toString();
+        return s3PresignClient.generatePresignedUrl(request).toString();
     }
 
     public List<UploadedPartDTO> listUploadedParts(String key, String uploadId) {

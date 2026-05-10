@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface ProjectRepository extends JpaRepository<ProjectModel, Long> {
     
-    @Query("SELECT pm FROM ProjectModel as pm WHERE :project_id=pm.project_id")
+    @Query("SELECT pm FROM ProjectModel as pm WHERE :project_id=pm.project_id ")
     ProjectModel findByProjectId(@Param("project_id") Integer project_id);
 
     @Query("SELECT tm FROM TaskModel as tm WHERE :project_id =tm.project.project_id")

@@ -35,6 +35,7 @@ public class NotificationService {
         if(notification.getAdressed_to() != null){
             dto.setAdressed_to(notification.getAdressed_to().getUserDTO());
         }
+        else{dto.setAdressed_to(null);}
 
         return dto;
     }

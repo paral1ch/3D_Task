@@ -25,14 +25,30 @@ public class S3Config {
     @Value("${aws.endpoint}")
     private String endpoint;
 
+    @Value("${aws.public-endpoint:}")
+    private String publicEndpoint;
+
     @Value("${aws.bucket}")
     private String bucket;
 
-    @Bean
+    @Bean("s3Client")
     public AmazonS3 s3Client(){
+        return buildClient(endpoint);
+    }
+
+    @Bean("s3PresignClient")
+    public AmazonS3 s3PresignClient() {
+        String resolvedEndpoint =
+            publicEndpoint == null || publicEndpoint.isBlank()
+                ? endpoint
+                : publicEndpoint;
+        return buildClient(resolvedEndpoint);
+    }
+
+    private AmazonS3 buildClient(String endpointUrl) {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey,secretKey);
         return AmazonS3ClientBuilder.standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint,region))
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpointUrl,region))
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withPathStyleAccessEnabled(true)
                 .build();
