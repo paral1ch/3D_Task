@@ -54,7 +54,7 @@ public class AuthController {
 
 
         if(!Objects.equals(user.getPashHash(), login.getPasswordHash())){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sosi  "+ login.getPasswordHash() + login.getEmail());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error");
         }
 
         String token = user.getEmail()+user.getUsername();
