@@ -96,7 +96,7 @@ public class TaskServices {
     public TaskExecutorModel setExecutor(Integer task_id,Integer user_id){
         TaskExecutorModel executor = new TaskExecutorModel();
         executor.setTask(taskRepository.findById(task_id));
-        executor.setUser(userRepository.findById(user_id));
+        executor.setUser(userRepository.findByIdNullable(user_id));
         taskExecutorRepository.save(executor);
         return executor;
     }
@@ -104,7 +104,7 @@ public class TaskServices {
     public TaskVerifierModel setVerifier(Integer task_id, Integer user_id){
         TaskVerifierModel verifier = new TaskVerifierModel();
         verifier.setTask(taskRepository.findById(task_id));
-        verifier.setUser(userRepository.findById(user_id));
+        verifier.setUser(userRepository.findByIdNullable(user_id));
         taskVerifierRepository.save(verifier);
         return verifier;
     }

@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface UserRepository extends JpaRepository<UserModel, Long>{
@@ -19,5 +21,8 @@ public interface UserRepository extends JpaRepository<UserModel, Long>{
     UserModel findByEmail(@Param("email") String email);
 
     @Query("SELECT u FROM UserModel u WHERE u.user_id = :user_id")
-    UserModel findById(@Param("user_id") Integer user_id);
+    UserModel findByIdNullable(@Param("user_id") Integer user_id);
+
+    @Query("SELECT u.user_id FROM UserModel u")
+    List<Integer> findAllId();
 }

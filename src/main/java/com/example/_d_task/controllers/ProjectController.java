@@ -227,7 +227,7 @@ public class ProjectController {
            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Role is already assigned to that user");
         }
         UserProjectModel pr = new UserProjectModel(
-                userRepository.findById(user_id),
+                userRepository.findByIdNullable(user_id),
                 projectRepository.findByProjectId(project_id),
                 ProjectRoles.TASK_CREATOR
         );
@@ -386,7 +386,7 @@ public class ProjectController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
         }
 
-        UserModel user = userRepository.findById(user_id);
+        UserModel user = userRepository.findByIdNullable(user_id);
         ProjectModel project = projectRepository.findByProjectId(project_id);
         if (user == null || project == null) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Forbidden action");

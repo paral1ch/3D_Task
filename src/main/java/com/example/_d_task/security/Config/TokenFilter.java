@@ -1,8 +1,10 @@
 package com.example._d_task.security.Config;
 
+import com.auth0.jwt.JWT;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.SessionRepository;
 import com.example._d_task.repositories.UserRepository;
+import com.example._d_task.services.JWTService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,27 +31,29 @@ public class TokenFilter extends OncePerRequestFilter {
     @Autowired
     private SessionRepository sessionRepository;
 
+    private JWTService jwtService;
+
+    public TokenFilter(UserRepository userRepository, JWTService jwtService){
+        this.userRepository = userRepository;
+        this.jwtService = jwtService;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         String token = extractToken(request);
-
         if (token != null){
-            UserModel user = sessionRepository.findUserByToken(token);
-            System.out.println();
-            if(user!=null){
-
-                List<GrantedAuthority> authorities = Collections.singletonList(
-                        new SimpleGrantedAuthority("ROLE_"+user.getRole().name())
-                );
-
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(user,null,authorities);
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if(jwtService.checkSignature(token,"access")){
+                UserModel user = userRepository.findByIdNullable(JWT.decode(token).getClaim("id").asInt());
+                if(user!=null){
+                    List<GrantedAuthority> authorities = Collections.singletonList(
+                            new SimpleGrantedAuthority("ROLE_"+user.getRole().name())
+                    );
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(user,null,authorities);
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
-
         }
-
         filterChain.doFilter(request,response);
     }
 

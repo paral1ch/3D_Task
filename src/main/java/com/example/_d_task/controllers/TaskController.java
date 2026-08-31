@@ -123,7 +123,7 @@ public class TaskController {
         nm.setDate(LocalDate.now());
         nm.setProject(projectRepository.findByProjectId(project_id));
         nm.setText("Вы были назначены исполняющим задачу: " + taskRepository.findById(task_id).getName());
-        nm.setAdressed_to(userRepository.findById(executor.getUserId()));
+        nm.setAdressed_to(userRepository.findByIdNullable(executor.getUserId()));
         nm.setUser(Auth.user());
         nm.setReaded(false);
         notificationRepository.save(nm);
@@ -153,7 +153,7 @@ public class TaskController {
         nm.setDate(LocalDate.now());
         nm.setProject(projectRepository.findByProjectId(project_id));
         nm.setText("Вы были назначены проверяющим задачу: " + taskRepository.findById(task_id).getName());
-        nm.setAdressed_to(userRepository.findById(verifier.getUserId()));
+        nm.setAdressed_to(userRepository.findByIdNullable(verifier.getUserId()));
         nm.setUser(Auth.user());
         nm.setReaded(false);
         notificationRepository.save(nm);
@@ -183,7 +183,7 @@ public class TaskController {
         nm.setDate(LocalDate.now());
         nm.setProject(projectRepository.findByProjectId(project_id));
         nm.setText("Вы больше не исполняете задачу: " + taskRepository.findById(task_id).getName());
-        nm.setAdressed_to(userRepository.findById(executor.getUserId()));
+        nm.setAdressed_to(userRepository.findByIdNullable(executor.getUserId()));
         nm.setUser(Auth.user());
         nm.setReaded(false);
         notificationRepository.save(nm);
@@ -210,7 +210,7 @@ public class TaskController {
         nm.setDate(LocalDate.now());
         nm.setProject(projectRepository.findByProjectId(project_id));
         nm.setText("Вы больше не проверяете задачу: " + taskRepository.findById(task_id).getName());
-        nm.setAdressed_to(userRepository.findById(verifier.getUserId()));
+        nm.setAdressed_to(userRepository.findByIdNullable(verifier.getUserId()));
         nm.setUser(Auth.user());
         nm.setReaded(false);
         notificationRepository.save(nm);
@@ -253,7 +253,7 @@ public class TaskController {
             nm.setDate(LocalDate.now());
             nm.setProject(projectRepository.findByProjectId(project_id));
             nm.setText("Исполнитель поставил статус НУЖНА ПРОВЕРКА задаче: " + taskRepository.findById(task_id).getName());
-            nm.setAdressed_to(userRepository.findById(verifier.getUser().getUserId()));
+            nm.setAdressed_to(userRepository.findByIdNullable(verifier.getUser().getUserId()));
             nm.setUser(Auth.user());
             nm.setReaded(false);
             notificationRepository.save(nm);
@@ -299,7 +299,7 @@ public class TaskController {
             nm.setDate(LocalDate.now());
             nm.setProject(projectRepository.findByProjectId(project_id));
             nm.setText("Проверяющий поставил статус " + taskDTO.getStatus().toString()+" задаче: " + taskRepository.findById(task_id).getName());
-            nm.setAdressed_to(userRepository.findById(verifier.getUser().getUserId()));
+            nm.setAdressed_to(userRepository.findByIdNullable(verifier.getUser().getUserId()));
             nm.setUser(Auth.user());
             nm.setReaded(false);
             notificationRepository.save(nm);
@@ -328,7 +328,7 @@ public class TaskController {
         TaskCommentModel comment = new TaskCommentModel();
         comment.setTask(taskRepository.findById(commentDTO.getTask_id()));
         comment.setText(commentDTO.getText());
-        comment.setUser(userRepository.findById(Auth.user().getUserId()));
+        comment.setUser(userRepository.findByIdNullable(Auth.user().getUserId()));
         taskCommentRepository.save(comment);
 
         return ResponseEntity.ok("Comment created" + commentDTO);

@@ -2,25 +2,23 @@ package com.example._d_task.models;
 
 
 import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.Date;
 
 @Entity
 @Table(name = "sessions")
+@Data
 public class SessionModel {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer session_id;
 
-    private String email;
-    @Column(name = "session_token")
-
-    private String session_token;
+    private String refresh_token;
+    private String access_token;
+    private Date refresh_exceeds_at;
+    private Date access_exceeds_at;
 
     public SessionModel(){}
-
-    public void setSessionToken(String token){this.session_token = token;}
-    public void setEmail(String email){this.email = email;}
-
-    public String getEmail(){return this.email;}
-    public String getSessionToken(){return this.session_token;}
 }

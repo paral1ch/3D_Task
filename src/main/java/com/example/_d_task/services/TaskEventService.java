@@ -43,7 +43,7 @@ public class TaskEventService {
         TaskEventModel event = new TaskEventModel();
         event.setEvent_type(eventType);
         event.setTask(taskRepository.findById(task_id));
-        event.setUser(userRepository.findById(user_id));
+        event.setUser(userRepository.findByIdNullable(user_id));
         event.setPayload(normalizePayload(payload));
         event.setCreated_at(LocalDateTime.now());
         event.setProject(projectRepository.findByProjectId(project_id));

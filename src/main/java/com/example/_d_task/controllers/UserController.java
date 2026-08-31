@@ -35,7 +35,7 @@ public class UserController {
     @PostMapping(path = "/logout")
     public @ResponseBody String logout(@RequestHeader("Authorization") String header){
         String token = header.substring(7);
-        sessionRepository.delete(sessionRepository.findByToken(token));
+        //sessionRepository.delete(sessionRepository.findByToken(token));
         return "Complete";
     }
 
@@ -45,11 +45,11 @@ public class UserController {
         return Auth.user().getUserDTO();
     }
 
-    @GetMapping(path = "/userByToken")
-    public @ResponseBody ResponseEntity<UserDTO> test(@RequestHeader("Authorization") String header){
-        String token = header.substring(7);
-        return ResponseEntity.ok(sessionRepository.findUserByToken(token).getUserDTO());
-    }
+    //@GetMapping(path = "/userByToken")
+    //public @ResponseBody ResponseEntity<UserDTO> test(@RequestHeader("Authorization") String header){
+    //    String token = header.substring(7);
+    //    return ResponseEntity.ok(sessionRepository.findUserByToken(token).getUserDTO());
+    //}
 
 
     @PostMapping(path = "/profile/edit")
