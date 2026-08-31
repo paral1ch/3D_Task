@@ -43,7 +43,7 @@ public class JWTService {
     }
 
     public String createAccessToken(String refresh_token){
-        if(checkSignature(refresh_token,"refresh")){
+        if(!checkSignature(refresh_token,"refresh")){
             return "Error";
         }
         UserModel user = userRepository.findByIdNullable(JWT.decode(refresh_token).getClaim("id").asInt());
