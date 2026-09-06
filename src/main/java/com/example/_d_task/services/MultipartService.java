@@ -36,17 +36,16 @@ public class MultipartService {
     private final AmazonS3 s3Client;
     private final AmazonS3 s3PresignClient;
     private final String bucketName;
-    @Autowired
+
     private FileMetadataRepository fileMetadataRepository;
 
-    @Autowired
     private FileAnnotationsRepository fileAnnotationsRepository;
 
-    @Autowired
     private TaskServices taskServices;
 
-    @Autowired
     private TaskRepository taskRepository;
+
+
 
     private static final Logger log = Logger.getLogger(
             MultipartService.class.getName()
@@ -57,11 +56,21 @@ public class MultipartService {
     public MultipartService(
             @Qualifier("s3Client") AmazonS3 s3Client,
             @Qualifier("s3PresignClient") AmazonS3 s3PresignClient,
-            @Qualifier("bucketName") String bucketName
+            @Qualifier("bucketName") String bucketName,
+            FileMetadataRepository fileMetadataRepository,
+            FileAnnotationsRepository fileAnnotationsRepository,
+            TaskServices taskServices,
+            TaskRepository taskRepository
+
     ) {
         this.s3Client = s3Client;
         this.s3PresignClient = s3PresignClient;
         this.bucketName = bucketName;
+
+        this.fileAnnotationsRepository = fileAnnotationsRepository;
+        this.fileMetadataRepository = fileMetadataRepository;
+        this.taskRepository = taskRepository;
+        this.taskServices = taskServices;
     }
 
 

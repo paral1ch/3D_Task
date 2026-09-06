@@ -17,7 +17,6 @@ import com.example._d_task.services.MultipartService;
 import com.example._d_task.services.TaskServices;
 import jakarta.transaction.Transactional;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,26 +31,44 @@ import java.util.stream.Collectors;
 @RequestMapping("/files")
 public class FilesController {
 
-    @Autowired
     private MultipartService multipartService;
 
-    @Autowired
     private FileMetadataRepository fileMetadataRepository;
-    @Autowired
+
     private ProjectFilesRepository projectFilesRepository;
 
-    @Autowired
     private TaskRepository taskRepository;
-    @Autowired
+
     private UserProjectRepository userProjectRepository;
-    @Autowired
+
     private ProjectRepository projectRepository;
-    @Autowired
+
     private TaskServices taskServices;
-    @Autowired
+
     private FileAnnotationsRepository fileAnnotationsRepository;
 
     private final Integer URL_LIFESPAN = 15;
+
+    public FilesController(
+            MultipartService multipartService,
+            FileMetadataRepository fileMetadataRepository,
+            ProjectFilesRepository projectFilesRepository,
+            TaskRepository taskRepository,
+            UserProjectRepository userProjectRepository,
+            ProjectRepository projectRepository,
+            TaskServices taskServices,
+            FileAnnotationsRepository fileAnnotationsRepository
+    ){
+        this.fileMetadataRepository = fileMetadataRepository;
+        this.multipartService = multipartService;
+        this.projectFilesRepository = projectFilesRepository;
+        this.userProjectRepository = userProjectRepository;
+        this.taskRepository = taskRepository;
+        this.taskServices = taskServices;
+        this.fileAnnotationsRepository = fileAnnotationsRepository;
+        this.projectRepository = projectRepository;
+    }
+
 
     private static final Logger log = Logger.getLogger(
             FilesController.class.getName()

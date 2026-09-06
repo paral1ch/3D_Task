@@ -11,10 +11,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private ProjectAccessInterceptor pai;
 
+    public WebConfig(ProjectAccessInterceptor pai){
+        this.pai = pai;
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         HandlerInterceptor projectAccessInterceptor;
         registry.addInterceptor(pai)
-                .addPathPatterns("/project/*/task/**"); // только нужные URL
+                .addPathPatterns("/project/*/task/**");
     }
 }

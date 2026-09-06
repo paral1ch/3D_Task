@@ -10,7 +10,6 @@ import com.example._d_task.services.JWTService;
 import com.example._d_task.services.SessionService;
 import com.example._d_task.services.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,17 +38,7 @@ public class AuthController {
 
     @PostMapping(path="/register")
     public ResponseEntity<String> register(@RequestBody RegisterDTO registerDTO) {
-        if(userRepository.existsByEmail(registerDTO.getEmail())){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("This email already exists");
-        }
-        if(userRepository.existsByUsername(registerDTO.getUsername())){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("This username already exists");
-        }
-
-
-        userService.createUserFromRegister(registerDTO);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body("User created ");
+        return userService.createUserFromRegister(registerDTO);
     }
 
     @PostMapping(path  = "/login")

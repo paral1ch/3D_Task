@@ -7,6 +7,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example._d_task.dto.SessionDTO;
+import com.example._d_task.enums.TokenTypes;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -38,21 +39,29 @@ public class JWTService {
     };
 
     public  String createJWTRefresh(UserModel user){
-        return JWT.create().withClaim("type","refresh").withClaim("id",user.getUserId())
-                .withClaim("jti", UUID.randomUUID().toString()).withExpiresAt(Instant.now().plus(refreshLifespan, ChronoUnit.DAYS)).withIssuer(ISSUER).sign(ALG);
+        return JWT.create().withClaim("type", TokenTypes.REFRESH.name())
+                .withClaim("id",user.getUserId())
+                .withClaim("jti", UUID.randomUUID().toString())
+                .withExpiresAt(Instant.now().plus(refreshLifespan, ChronoUnit.DAYS))
+                .withIssuer(ISSUER).sign(ALG);
     }
 
     public String createAccessToken(String refresh_token){
-        if(!checkSignature(refresh_token,"refresh")){
+        if(!checkSignature(refresh_token,TokenTypes.REFRESH.name())){
+            log.info("Error during creating access token: " + checkSignature(refresh_token,TokenTypes.REFRESH.name()));
             return "Error";
         }
         UserModel user = userRepository.findByIdNullable(JWT.decode(refresh_token).getClaim("id").asInt());
-        return JWT.create().withClaim("type","access").withClaim("id",user.getUserId())
-                .withClaim("jti", UUID.randomUUID().toString()).withExpiresAt(Instant.now().plus(accessLifespan, ChronoUnit.MINUTES)).withIssuer(ISSUER).sign(ALG);
+        return JWT.create().withClaim("type",TokenTypes.ACCESS.name())
+                .withClaim("id",user.getUserId())
+                .withClaim("jti", UUID.randomUUID().toString())
+                .withExpiresAt(Instant.now()
+                        .plus(accessLifespan, ChronoUnit.MINUTES))
+                .withIssuer(ISSUER).sign(ALG);
     }
 
     public ResponseEntity<?> initRefresh(String token){
-        if(!checkSignature(token,"refresh")){
+        if(!checkSignature(token, TokenTypes.REFRESH.name())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error");
         }
         UserModel user = userRepository.findByIdNullable(JWT.decode(token).getClaim("id").asInt());
@@ -67,13 +76,11 @@ public class JWTService {
         try{
             JWTVerifier verifier = JWT.require(ALG).withIssuer(ISSUER).build();
             DecodedJWT decoded = verifier.verify(token);
-            if(!Objects.equals(decoded.getClaim("type").toString(), expectedType)){
+            if(!Objects.equals(decoded.getClaim("type").toString(),'"'+  expectedType+'"')){
+                log.info("Wrong type " + decoded.getClaim("type").toString() + " " + expectedType);
                 return false;
             }
-            if(decoded.getExpiresAt().before(Date.from(Instant.now()))){
-                return false;
-            }
-            return true;
+            return !decoded.getExpiresAt().before(Date.from(Instant.now()));
         }
         catch(JWTVerificationException e){
             log.error("verification failed: {}", e.getMessage(),e);

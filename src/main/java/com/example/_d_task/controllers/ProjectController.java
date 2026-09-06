@@ -12,7 +12,6 @@ import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.services.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,42 +26,46 @@ import java.util.logging.Logger;
 @RequestMapping(path="/project")
 public class ProjectController {
 
-    @Autowired
     private ProjectRepository projectRepository;
 
-    @Autowired
     private UserProjectRepository userProjectRepository;
 
-    @Autowired
     private ProjectServices projectService;
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private UserService userService;
 
-    @Autowired
     private TaskServices taskServices;
 
-    @Autowired
     private TaskRepository taskRepository;
 
-    @Autowired
     private ProjectNotificationRepository projectNotificationRepository;
 
-    @Autowired
     private NotificationService notificationService;
 
-    @Autowired
     private TaskEventRepository eventRepository;
 
-    @Autowired
     private TaskEventService eventService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static Logger log = Logger.getLogger(ProjectController.class.getName());
+
+    public ProjectController(ProjectRepository projectRepository,UserProjectRepository userProjectRepository,ProjectServices projectService,UserRepository userRepository,UserService userService
+                            ,TaskServices taskServices,TaskRepository taskRepository,ProjectNotificationRepository projectNotificationRepository,
+                             NotificationService notificationService,TaskEventRepository eventRepository,TaskEventService eventService){
+        this.projectRepository = projectRepository;
+        this.userProjectRepository = userProjectRepository;
+        this.projectService = projectService;
+        this.userRepository = userRepository;
+        this.taskServices = taskServices;
+        this.taskRepository = taskRepository;
+        this.projectNotificationRepository = projectNotificationRepository;
+        this.notificationService = notificationService;
+        this.eventRepository = eventRepository;
+        this.eventService = eventService;
+    }
 
     @GetMapping(path = "/myProjects")
     public ResponseEntity<?> getProjects(){

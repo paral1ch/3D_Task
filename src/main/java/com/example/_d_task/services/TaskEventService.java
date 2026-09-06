@@ -11,7 +11,6 @@ import com.example._d_task.repositories.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,24 +19,30 @@ import java.util.List;
 
 @Service
 public class TaskEventService {
-    @Autowired
+
     private TaskRepository taskRepository;
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private TaskEventRepository eventRepository;
 
-    @Autowired
     private TaskServices taskServices;
-    @Autowired
+
     private UserService userService;
 
-    @Autowired
     private ProjectRepository projectRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public TaskEventService(TaskRepository taskRepository,UserRepository userRepository,TaskEventRepository eventRepository,
+                            TaskServices taskServices, UserService userService,ProjectRepository projectRepository){
+        this.taskServices = taskServices;
+        this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
+        this.eventRepository = eventRepository;
+        this.userService = userService;
+        this.projectRepository = projectRepository;
+    }
 
     public void record(Integer task_id, TaskEventType eventType, Integer user_id, ObjectNode payload, Integer project_id) {
         TaskEventModel event = new TaskEventModel();

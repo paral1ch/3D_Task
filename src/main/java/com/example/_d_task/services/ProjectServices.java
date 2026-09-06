@@ -5,14 +5,13 @@ import com.example._d_task.dto.ProjectDTO;
 import com.example._d_task.dto.UserDTO;
 import com.example._d_task.enums.ProjectRolePermissions;
 import com.example._d_task.enums.ProjectRoles;
-import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.models.ProjectModel;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.models.UserProjectModel;
 import com.example._d_task.repositories.ProjectRepository;
 import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example._d_task.security.Classes.Auth;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,14 +20,18 @@ import java.util.stream.Collectors;
 @Service
 public class ProjectServices {
 
-    @Autowired
     private ProjectRepository projectRepository;
 
-    @Autowired
     private UserProjectRepository userProjectRepository;
 
-    @Autowired
     private UserRepository userRepository;
+
+    public ProjectServices(ProjectRepository projectRepository, UserProjectRepository userProjectRepository,
+                           UserRepository userRepository){
+        this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
+        this.userProjectRepository = userProjectRepository;
+    }
 
     public boolean canModifyTasks(Integer project_id){
 

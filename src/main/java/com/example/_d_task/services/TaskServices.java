@@ -7,7 +7,6 @@ import com.example._d_task.models.TaskModel;
 import com.example._d_task.models.TaskVerifierModel;
 import com.example._d_task.repositories.*;
 import com.example._d_task.security.Classes.Auth;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,34 +15,51 @@ import java.util.stream.Collectors;
 
 @Service
 public class TaskServices {
-    @Autowired
+
     private ProjectRepository projectRepository;
 
-    @Autowired
     private TaskRepository taskRepository;
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private TaskExecutorRepository taskExecutorRepository;
 
-    @Autowired
     private TaskVerifierRepository taskVerifierRepository;
 
-    @Autowired
     private UserService userService;
 
-    @Autowired
     private TaskCommentRepository taskCommentRepository;
-    @Autowired
+
     private CommentService commentService;
 
-    @Autowired
     private UserProjectRepository userProjectRepository;
 
-    @Autowired
     private ProjectServices projectServices;
+
+    public TaskServices(
+            ProjectRepository projectRepository,
+            TaskRepository taskRepository,
+            UserRepository userRepository,
+            TaskExecutorRepository taskExecutorRepository,
+            TaskVerifierRepository taskVerifierRepository,
+            UserService userService,
+            TaskCommentRepository taskCommentRepository,
+            CommentService commentService,
+            UserProjectRepository userProjectRepository,
+            ProjectServices projectServices
+    ) {
+        this.projectServices = projectServices;
+        this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
+        this.taskRepository = taskRepository;
+        this.taskExecutorRepository = taskExecutorRepository;
+        this.taskVerifierRepository = taskVerifierRepository;
+        this.userService = userService;
+        this.taskCommentRepository = taskCommentRepository;
+        this.commentService = commentService;
+        this.userProjectRepository = userProjectRepository;
+    }
+
     public void createTask(Integer project_id, TaskDTO taskDTO){
         TaskModel task = new TaskModel();
         task.setName(taskDTO.getName());

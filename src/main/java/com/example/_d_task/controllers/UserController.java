@@ -7,7 +7,6 @@ import com.example._d_task.repositories.SessionRepository;
 import com.example._d_task.repositories.UserRepository;
 import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,15 +16,18 @@ import java.util.Objects;
 @RestController
 @RequestMapping(path="/Users")
 public class UserController {
-    @Autowired
+
     private UserRepository userRepository;
 
-    @Autowired
     private SessionRepository sessionRepository;
 
-    @Autowired
     private UserService userService;
 
+    public UserController(UserRepository userRepository, SessionRepository sessionRepository, UserService userService){
+        this.userRepository = userRepository;
+        this.userService = userService;
+        this.sessionRepository = sessionRepository;
+    }
 
     @GetMapping(path = "/AllUsers")
     public @ResponseBody Iterable<UserModel> getUsers(){

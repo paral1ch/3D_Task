@@ -9,7 +9,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,24 +24,23 @@ import java.util.List;
 @Component
 public class TokenFilter extends OncePerRequestFilter {
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private SessionRepository sessionRepository;
 
     private JWTService jwtService;
 
-    public TokenFilter(UserRepository userRepository, JWTService jwtService){
+    public TokenFilter(UserRepository userRepository, JWTService jwtService, SessionRepository sessionRepository){
         this.userRepository = userRepository;
         this.jwtService = jwtService;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
         if (token != null){
-            if(jwtService.checkSignature(token,"access")){
+            if(!jwtService.checkSignature(token,"access")){
                 UserModel user = userRepository.findByIdNullable(JWT.decode(token).getClaim("id").asInt());
                 if(user!=null){
                     List<GrantedAuthority> authorities = Collections.singletonList(

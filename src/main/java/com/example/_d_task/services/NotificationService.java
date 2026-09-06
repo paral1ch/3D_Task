@@ -3,7 +3,6 @@ package com.example._d_task.services;
 
 import com.example._d_task.dto.NotificationDTO;
 import com.example._d_task.models.ProjectNotificationModel;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,8 +11,12 @@ import java.util.List;
 @Service
 public class NotificationService {
 
-    @Autowired
     private UserService userService;
+
+    public NotificationService(UserService userService){
+        this.userService = userService;
+    }
+
 
     public List<NotificationDTO> convertModelsToDTO(List<ProjectNotificationModel> list){
         List<NotificationDTO> dtoList = new ArrayList<>();

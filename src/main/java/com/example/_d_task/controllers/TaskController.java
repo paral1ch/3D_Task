@@ -20,7 +20,6 @@ import com.example._d_task.services.TaskServices;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,37 +30,43 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping(path="/project/{project_id}/task")
 public class TaskController {
-    @Autowired
     private UserProjectRepository userProjectRepository;
 
-    @Autowired
     private TaskServices taskServices;
 
-    @Autowired
     private TaskRepository taskRepository;
 
-    @Autowired
     private ProjectServices projectServices;
 
-    @Autowired
     private ProjectRepository projectRepository;
-    @Autowired
+
     private UserRepository userRepository;
 
-    @Autowired
     private TaskCommentRepository taskCommentRepository;
 
-    @Autowired
     private TaskVerifierRepository taskVerifierRepository;
 
-    @Autowired
     private TaskExecutorRepository taskExecutorRepository;
 
-    @Autowired
     private TaskEventService eventService;
 
-    @Autowired
     private ProjectNotificationRepository notificationRepository;
+
+
+    public TaskController(UserProjectRepository userProjectRepository, TaskServices taskServices,
+                          TaskRepository taskRepository,ProjectServices projectServices,UserRepository userRepository,
+                          TaskCommentRepository taskCommentRepository,TaskVerifierRepository taskVerifierRepository,
+                          TaskEventService eventService,ProjectNotificationRepository notificationRepository){
+        this.notificationRepository = notificationRepository;
+        this.eventService = eventService;
+        this.userProjectRepository = userProjectRepository;
+        this.taskServices = taskServices;
+        this.taskRepository = taskRepository;
+        this.projectServices = projectServices;
+        this.userRepository = userRepository;
+        this.taskCommentRepository = taskCommentRepository;
+        this.taskVerifierRepository = taskVerifierRepository;
+    }
 
     private ObjectMapper mapper = new ObjectMapper();
     @PostMapping(path = "/create")

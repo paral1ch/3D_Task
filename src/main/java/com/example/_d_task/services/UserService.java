@@ -7,6 +7,8 @@ import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +22,14 @@ public class UserService {
     @Autowired
     private UserProjectRepository userProjectRepository;
 
-    public void createUserFromRegister(RegisterDTO registerDTO){
+    public ResponseEntity<String> createUserFromRegister(RegisterDTO registerDTO){
+        if(userRepository.existsByEmail(registerDTO.getEmail())){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("This email already exists");
+        }
+        if(userRepository.existsByUsername(registerDTO.getUsername())){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("This username already exists");
+        }
+
         UserModel user = new UserModel();
 
         user.setUsername(registerDTO.getUsername());
@@ -29,6 +38,7 @@ public class UserService {
         user.setPassHash(registerDTO.getPasswordHash());
         user.setRole(Role.USER);
         userRepository.save(user);
+        return ResponseEntity.ok().body("User created");
     }
 
     public UserModel getUserByEmail(String email){
