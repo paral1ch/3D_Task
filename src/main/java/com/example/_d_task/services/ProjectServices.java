@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 @Service
 public class ProjectServices {
 
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-    private UserProjectRepository userProjectRepository;
+    private final UserProjectRepository userProjectRepository;
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public ProjectServices(ProjectRepository projectRepository, UserProjectRepository userProjectRepository,
                            UserRepository userRepository){

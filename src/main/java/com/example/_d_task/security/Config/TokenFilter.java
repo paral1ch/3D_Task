@@ -24,16 +24,13 @@ import java.util.List;
 @Component
 public class TokenFilter extends OncePerRequestFilter {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private SessionRepository sessionRepository;
-
-    private JWTService jwtService;
+    private final JWTService jwtService;
 
     public TokenFilter(UserRepository userRepository, JWTService jwtService, SessionRepository sessionRepository){
         this.userRepository = userRepository;
         this.jwtService = jwtService;
-        this.sessionRepository = sessionRepository;
     }
 
     @Override

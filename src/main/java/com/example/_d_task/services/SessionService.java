@@ -15,15 +15,12 @@ import java.util.Objects;
 @Service
 public class SessionService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private SessionRepository sessionRepository;
-
-    private JWTService jwtService;
+    private final JWTService jwtService;
 
     public SessionService(UserRepository userRepository,SessionRepository sessionRepository,JWTService jwtService){
         this.userRepository = userRepository;
-        this.sessionRepository = sessionRepository;
         this.jwtService = jwtService;
     }
 

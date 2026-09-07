@@ -13,7 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private TokenFilter tokenFilter;
+    private final TokenFilter tokenFilter;
 
     public SecurityConfig(TokenFilter tokenFilter){
         this.tokenFilter = tokenFilter;

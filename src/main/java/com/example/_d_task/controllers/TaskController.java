@@ -30,33 +30,34 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping(path="/project/{project_id}/task")
 public class TaskController {
-    private UserProjectRepository userProjectRepository;
+    private final UserProjectRepository userProjectRepository;
 
-    private TaskServices taskServices;
+    private final TaskServices taskServices;
 
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    private ProjectServices projectServices;
+    private final ProjectServices projectServices;
 
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private TaskCommentRepository taskCommentRepository;
+    private final TaskCommentRepository taskCommentRepository;
 
-    private TaskVerifierRepository taskVerifierRepository;
+    private final TaskVerifierRepository taskVerifierRepository;
 
-    private TaskExecutorRepository taskExecutorRepository;
+    private final TaskExecutorRepository taskExecutorRepository;
 
-    private TaskEventService eventService;
+    private final TaskEventService eventService;
 
-    private ProjectNotificationRepository notificationRepository;
+    private final ProjectNotificationRepository notificationRepository;
 
 
     public TaskController(UserProjectRepository userProjectRepository, TaskServices taskServices,
                           TaskRepository taskRepository,ProjectServices projectServices,UserRepository userRepository,
                           TaskCommentRepository taskCommentRepository,TaskVerifierRepository taskVerifierRepository,
-                          TaskEventService eventService,ProjectNotificationRepository notificationRepository){
+                          TaskEventService eventService,ProjectNotificationRepository notificationRepository, ProjectRepository projectRepository,
+                          TaskExecutorRepository taskExecutorRepository){
         this.notificationRepository = notificationRepository;
         this.eventService = eventService;
         this.userProjectRepository = userProjectRepository;
@@ -64,8 +65,10 @@ public class TaskController {
         this.taskRepository = taskRepository;
         this.projectServices = projectServices;
         this.userRepository = userRepository;
+        this.projectRepository = projectRepository;
         this.taskCommentRepository = taskCommentRepository;
         this.taskVerifierRepository = taskVerifierRepository;
+        this.taskExecutorRepository = taskExecutorRepository;
     }
 
     private ObjectMapper mapper = new ObjectMapper();

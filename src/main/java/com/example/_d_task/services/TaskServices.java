@@ -16,25 +16,23 @@ import java.util.stream.Collectors;
 @Service
 public class TaskServices {
 
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private TaskExecutorRepository taskExecutorRepository;
+    private final TaskExecutorRepository taskExecutorRepository;
 
-    private TaskVerifierRepository taskVerifierRepository;
+    private final TaskVerifierRepository taskVerifierRepository;
 
-    private UserService userService;
+    private final UserService userService;
 
-    private TaskCommentRepository taskCommentRepository;
+    private final TaskCommentRepository taskCommentRepository;
 
-    private CommentService commentService;
+    private final CommentService commentService;
 
-    private UserProjectRepository userProjectRepository;
-
-    private ProjectServices projectServices;
+    private final ProjectServices projectServices;
 
     public TaskServices(
             ProjectRepository projectRepository,
@@ -57,7 +55,6 @@ public class TaskServices {
         this.userService = userService;
         this.taskCommentRepository = taskCommentRepository;
         this.commentService = commentService;
-        this.userProjectRepository = userProjectRepository;
     }
 
     public void createTask(Integer project_id, TaskDTO taskDTO){

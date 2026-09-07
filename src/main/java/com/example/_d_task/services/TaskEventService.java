@@ -20,17 +20,17 @@ import java.util.List;
 @Service
 public class TaskEventService {
 
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    private TaskEventRepository eventRepository;
+    private final TaskEventRepository eventRepository;
 
-    private TaskServices taskServices;
+    private final TaskServices taskServices;
 
-    private UserService userService;
+    private final UserService userService;
 
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

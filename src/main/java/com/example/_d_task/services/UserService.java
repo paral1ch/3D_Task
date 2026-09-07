@@ -6,7 +6,6 @@ import com.example._d_task.enums.Role;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,11 +15,17 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserProjectRepository userProjectRepository;
+    private final UserProjectRepository userProjectRepository;
+
+    public UserService(
+            UserRepository userRepository,
+            UserProjectRepository userProjectRepository
+    ){
+        this.userRepository = userRepository;
+        this.userProjectRepository = userProjectRepository;
+    }
 
     public ResponseEntity<String> createUserFromRegister(RegisterDTO registerDTO){
         if(userRepository.existsByEmail(registerDTO.getEmail())){

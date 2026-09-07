@@ -17,16 +17,10 @@ import java.util.Objects;
 @RequestMapping(path="/Users")
 public class UserController {
 
-    private UserRepository userRepository;
-
-    private SessionRepository sessionRepository;
-
-    private UserService userService;
+    private final UserRepository userRepository;
 
     public UserController(UserRepository userRepository, SessionRepository sessionRepository, UserService userService){
         this.userRepository = userRepository;
-        this.userService = userService;
-        this.sessionRepository = sessionRepository;
     }
 
     @GetMapping(path = "/AllUsers")

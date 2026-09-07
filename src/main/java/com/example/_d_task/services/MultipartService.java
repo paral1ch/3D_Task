@@ -37,15 +37,11 @@ public class MultipartService {
     private final AmazonS3 s3PresignClient;
     private final String bucketName;
 
-    private FileMetadataRepository fileMetadataRepository;
+    private final FileMetadataRepository fileMetadataRepository;
 
-    private FileAnnotationsRepository fileAnnotationsRepository;
+    private final FileAnnotationsRepository fileAnnotationsRepository;
 
-    private TaskServices taskServices;
-
-    private TaskRepository taskRepository;
-
-
+    private final TaskRepository taskRepository;
 
     private static final Logger log = Logger.getLogger(
             MultipartService.class.getName()
@@ -70,7 +66,6 @@ public class MultipartService {
         this.fileAnnotationsRepository = fileAnnotationsRepository;
         this.fileMetadataRepository = fileMetadataRepository;
         this.taskRepository = taskRepository;
-        this.taskServices = taskServices;
     }
 
 

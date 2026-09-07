@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class NotificationService {
 
-    private UserService userService;
+    private final UserService userService;
 
     public NotificationService(UserService userService){
         this.userService = userService;

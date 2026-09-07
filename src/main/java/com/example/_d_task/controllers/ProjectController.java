@@ -26,27 +26,27 @@ import java.util.logging.Logger;
 @RequestMapping(path="/project")
 public class ProjectController {
 
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-    private UserProjectRepository userProjectRepository;
+    private final UserProjectRepository userProjectRepository;
 
-    private ProjectServices projectService;
+    private final ProjectServices projectService;
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     private UserService userService;
 
-    private TaskServices taskServices;
+    private final TaskServices taskServices;
 
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    private ProjectNotificationRepository projectNotificationRepository;
+    private final ProjectNotificationRepository projectNotificationRepository;
 
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
-    private TaskEventRepository eventRepository;
+    private final TaskEventRepository eventRepository;
 
-    private TaskEventService eventService;
+    private final TaskEventService eventService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -65,6 +65,7 @@ public class ProjectController {
         this.notificationService = notificationService;
         this.eventRepository = eventRepository;
         this.eventService = eventService;
+        this.userService = userService;
     }
 
     @GetMapping(path = "/myProjects")

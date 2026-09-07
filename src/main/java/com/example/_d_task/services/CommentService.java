@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class CommentService {
 
-    private TaskCommentRepository taskCommentRepository;
+    private final TaskCommentRepository taskCommentRepository;
 
     public CommentService(TaskCommentRepository taskCommentRepository){
         this.taskCommentRepository = taskCommentRepository;

@@ -18,19 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path="/auth")
 public class AuthController {
 
-    private UserRepository userRepository;
+    private final UserService userService;
 
-    private UserService userService;
+    private final JWTService jwtService;
 
-    private SessionRepository sessionRepository;
-
-    private JWTService jwtService;
-
-    private SessionService sessionService;
+    private final SessionService sessionService;
 
     public AuthController(UserRepository userRepository, UserService userService, SessionRepository sessionRepository,JWTService jwtService,SessionService sessionService){
-        this.sessionRepository=sessionRepository;
-        this.userRepository=userRepository;
         this.userService=userService;
         this.jwtService= jwtService;
         this.sessionService = sessionService;

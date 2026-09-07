@@ -31,21 +31,21 @@ import java.util.stream.Collectors;
 @RequestMapping("/files")
 public class FilesController {
 
-    private MultipartService multipartService;
+    private final MultipartService multipartService;
 
-    private FileMetadataRepository fileMetadataRepository;
+    private final FileMetadataRepository fileMetadataRepository;
 
-    private ProjectFilesRepository projectFilesRepository;
+    private final ProjectFilesRepository projectFilesRepository;
 
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    private UserProjectRepository userProjectRepository;
+    private final UserProjectRepository userProjectRepository;
 
-    private ProjectRepository projectRepository;
+    private final ProjectRepository projectRepository;
 
-    private TaskServices taskServices;
+    private final TaskServices taskServices;
 
-    private FileAnnotationsRepository fileAnnotationsRepository;
+    private final FileAnnotationsRepository fileAnnotationsRepository;
 
     private final Integer URL_LIFESPAN = 15;
 
