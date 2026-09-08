@@ -13,6 +13,7 @@ import com.example._d_task.models.ProjectFilesModel;
 import com.example._d_task.models.ProjectModel;
 import com.example._d_task.repositories.*;
 import com.example._d_task.security.Classes.Auth;
+import com.example._d_task.services.CommentService;
 import com.example._d_task.services.MultipartService;
 import com.example._d_task.services.TaskServices;
 import jakarta.transaction.Transactional;
@@ -46,7 +47,7 @@ public class FilesController {
     private final TaskServices taskServices;
 
     private final FileAnnotationsRepository fileAnnotationsRepository;
-
+    private final CommentService commentService;
     private final Integer URL_LIFESPAN = 15;
 
     public FilesController(
@@ -57,7 +58,8 @@ public class FilesController {
             UserProjectRepository userProjectRepository,
             ProjectRepository projectRepository,
             TaskServices taskServices,
-            FileAnnotationsRepository fileAnnotationsRepository
+            FileAnnotationsRepository fileAnnotationsRepository,
+            CommentService commentService
     ){
         this.fileMetadataRepository = fileMetadataRepository;
         this.multipartService = multipartService;
@@ -67,6 +69,7 @@ public class FilesController {
         this.taskServices = taskServices;
         this.fileAnnotationsRepository = fileAnnotationsRepository;
         this.projectRepository = projectRepository;
+        this.commentService = commentService;
     }
 
 
@@ -143,7 +146,7 @@ public class FilesController {
         if(file==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error");
         }
-        if(!taskServices.canAddComments(file.getTask().getTask_id())){
+        if(!commentService.canAddComments(file.getTask().getTask_id())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
         }
 
@@ -162,7 +165,7 @@ public class FilesController {
         if(file==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error");
         }
-        if(!taskServices.canAddComments(file.getTask().getTask_id())){
+        if(!commentService.canAddComments(file.getTask().getTask_id())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
         }
         List<PartETag> etags = request.getParts().stream()
@@ -535,7 +538,7 @@ public class FilesController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such file");
         }
         Integer task_id = file.getTask().getTask_id();
-        if(!taskServices.canAddComments(task_id)){
+        if(!commentService.canAddComments(task_id)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
         }
         var annotations = fileAnnotationsRepository.getAnnotationsByFileId(file_id);
@@ -551,7 +554,7 @@ public class FilesController {
         if (annotation == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such annotation");
         }
-        if (!taskServices.canAddComments(annotation.getFile().getTask().getTask_id())) {
+        if (!commentService.canAddComments(annotation.getFile().getTask().getTask_id())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
         }
         String key = annotation.getS3Key();
@@ -568,7 +571,7 @@ public class FilesController {
         if (annotation == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no such annotation");
         }
-        if (!taskServices.canAddComments(annotation.getFile().getTask().getTask_id())) {
+        if (!commentService.canAddComments(annotation.getFile().getTask().getTask_id())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
         }
         if (annotation.getS3Key() != null && !annotation.getS3Key().isBlank()) {

@@ -1,38 +1,39 @@
 package com.example._d_task.services;
 
 
-import com.example._d_task.dto.CommentDTO;
-import com.example._d_task.models.TaskCommentModel;
+import com.example._d_task.enums.ProjectRolePermissions;
+import com.example._d_task.models.TaskModel;
 import com.example._d_task.repositories.TaskCommentRepository;
+import com.example._d_task.repositories.TaskRepository;
+import com.example._d_task.repositories.UserProjectRepository;
+import com.example._d_task.security.Classes.Auth;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class CommentService {
 
     private final TaskCommentRepository taskCommentRepository;
-
-    public CommentService(TaskCommentRepository taskCommentRepository){
+    private final TaskRepository taskRepository;
+    private final UserProjectRepository userProjectRepository;
+    public CommentService(TaskCommentRepository taskCommentRepository, TaskRepository taskRepository,
+                          UserProjectRepository userProjectRepository){
         this.taskCommentRepository = taskCommentRepository;
+        this.taskRepository = taskRepository;
+        this.userProjectRepository = userProjectRepository;
+
     }
 
-    public CommentDTO convertModelToDTO(TaskCommentModel taskCommentModel){
-        CommentDTO dto = new CommentDTO();
-        dto.setComment_id(taskCommentModel.getComment_id());
-        dto.setText(taskCommentModel.getText());
-        dto.setUser(taskCommentModel.getUser().getUserDTO());
-        dto.setTask_id(taskCommentModel.getTask().getTask_id());
-        return dto;
-    }
 
-    public List<CommentDTO> convertModelsToDTO(List<TaskCommentModel> comments){
-        List<CommentDTO> dtoList = new ArrayList<>();
 
-        for(TaskCommentModel comment: comments){
-            dtoList.add(convertModelToDTO(comment));
+    public boolean canAddComments(Integer task_id){
+        TaskModel task = taskRepository.findById(task_id);
+        if(!taskRepository.getExecutors(task_id).contains(Auth.user()) &&
+                !taskRepository.getVerifiers(task_id).contains(Auth.user()) &&
+                !ProjectRolePermissions.canCreateTask(
+                        userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), task.getProject().getProject_id()))){
+            return false;
+
         }
-        return dtoList;
+        return true;
     }
 }

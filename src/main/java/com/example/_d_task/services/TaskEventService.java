@@ -1,21 +1,19 @@
 package com.example._d_task.services;
 
 
-import com.example._d_task.dto.TaskEventDTO;
 import com.example._d_task.enums.TaskEventType;
 import com.example._d_task.models.TaskEventModel;
 import com.example._d_task.repositories.ProjectRepository;
 import com.example._d_task.repositories.TaskEventRepository;
 import com.example._d_task.repositories.TaskRepository;
 import com.example._d_task.repositories.UserRepository;
+import com.example._d_task.services.servicesUtils.ModelToDTOConverters;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class TaskEventService {
@@ -31,17 +29,19 @@ public class TaskEventService {
     private final UserService userService;
 
     private final ProjectRepository projectRepository;
-
+    private final ModelToDTOConverters modelToDTOConverters;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TaskEventService(TaskRepository taskRepository,UserRepository userRepository,TaskEventRepository eventRepository,
-                            TaskServices taskServices, UserService userService,ProjectRepository projectRepository){
+                            TaskServices taskServices, UserService userService,ProjectRepository projectRepository,
+                            ModelToDTOConverters modelToDTOConverters){
         this.taskServices = taskServices;
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.eventRepository = eventRepository;
         this.userService = userService;
         this.projectRepository = projectRepository;
+        this.modelToDTOConverters = modelToDTOConverters;
     }
 
     public void record(Integer task_id, TaskEventType eventType, Integer user_id, ObjectNode payload, Integer project_id) {
@@ -55,27 +55,7 @@ public class TaskEventService {
         eventRepository.save(event);
     }
 
-    public TaskEventDTO modelToDTO(TaskEventModel event) {
-        TaskEventDTO dto = new TaskEventDTO();
-        dto.setEvent_id(event.getTask_event_id());
-        dto.setEventType(event.getEvent_type());
-        dto.setProject_id(event.getProject().getProject_id());
-        dto.setTask(taskServices.taskToDTO(event.getTask()));
-        dto.setCreated_at(event.getCreated_at());
-        dto.setUser(userService.convertModelToDTO(event.getUser()));
-        JsonNode normalizedPayload = normalizePayload(event.getPayload());
-        dto.setPayload(
-            isCorruptedPayloadDescriptor(normalizedPayload) || normalizedPayload == null
-                ? null
-                : normalizedPayload.toString()
-        );
-        return dto;
-    }
-    public List<TaskEventDTO> modelsToDTO(List<TaskEventModel> list){
-        List<TaskEventDTO> dtos = new ArrayList<>();
-        list.forEach(event -> dtos.add(modelToDTO(event)));
-        return dtos;
-    }
+
 
     private JsonNode normalizePayload(JsonNode payload) {
         if (payload == null || payload.isNull()) {

@@ -2,44 +2,48 @@ package com.example._d_task.services;
 
 
 import com.example._d_task.dto.NotificationDTO;
+import com.example._d_task.enums.ProjectRolePermissions;
 import com.example._d_task.models.ProjectNotificationModel;
+import com.example._d_task.repositories.ProjectNotificationRepository;
+import com.example._d_task.repositories.ProjectRepository;
+import com.example._d_task.repositories.UserProjectRepository;
+import com.example._d_task.security.Classes.Auth;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 public class NotificationService {
 
-    private final UserService userService;
 
-    public NotificationService(UserService userService){
-        this.userService = userService;
+    private final ProjectRepository projectRepository;
+    private final ProjectNotificationRepository projectNotificationRepository;
+    private final UserProjectRepository userProjectRepository;
+    public NotificationService(UserService userService, ProjectServices projectServices, ProjectRepository projectRepository,
+                               ProjectNotificationRepository projectNotificationRepository, UserProjectRepository userProjectRepository){
+        this.userProjectRepository = userProjectRepository;
+        this.projectRepository = projectRepository;
+        this.projectNotificationRepository = projectNotificationRepository;
     }
 
 
-    public List<NotificationDTO> convertModelsToDTO(List<ProjectNotificationModel> list){
-        List<NotificationDTO> dtoList = new ArrayList<>();
-        for(ProjectNotificationModel notification: list){
-            dtoList.add(convertModelToDTO(notification));
+
+
+    public ResponseEntity<?> addNotification(@PathVariable("project_id") Integer project_id,
+                                             @RequestBody NotificationDTO dto){
+        if (!ProjectRolePermissions.canCreateTask(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id))){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
         }
 
-        return dtoList;
-    }
+        ProjectNotificationModel projectNotification = new ProjectNotificationModel();
+        projectNotification.setText(dto.getText());
+        projectNotification.setProject(projectRepository.findByProjectId(project_id));
+        projectNotification.setUser(Auth.user());
+        projectNotification.setDate(dto.getDate());
+        projectNotificationRepository.save(projectNotification);
 
-
-    public NotificationDTO convertModelToDTO(ProjectNotificationModel notification){
-        NotificationDTO dto = new NotificationDTO();
-        dto.setNotification_id(notification.getNotification_id());
-        dto.setText(notification.getText());
-        dto.setDate(notification.getDate());
-        dto.setCreated_by(userService.convertModelToDTO(notification.getUser()));
-        dto.setReaded(notification.getReaded());
-        if(notification.getAdressed_to() != null){
-            dto.setAdressed_to(notification.getAdressed_to().getUserDTO());
-        }
-        else{dto.setAdressed_to(null);}
-
-        return dto;
+        return ResponseEntity.ok("Notification created");
     }
 }

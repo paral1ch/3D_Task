@@ -14,9 +14,11 @@ import com.example._d_task.models.TaskModel;
 import com.example._d_task.models.TaskVerifierModel;
 import com.example._d_task.repositories.*;
 import com.example._d_task.security.Classes.Auth;
+import com.example._d_task.services.CommentService;
 import com.example._d_task.services.ProjectServices;
 import com.example._d_task.services.TaskEventService;
 import com.example._d_task.services.TaskServices;
+import com.example._d_task.services.servicesUtils.ModelToDTOConverters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
@@ -52,12 +54,13 @@ public class TaskController {
 
     private final ProjectNotificationRepository notificationRepository;
 
-
+    private final CommentService commentService;
+    private final ModelToDTOConverters modelToDTOConverters;
     public TaskController(UserProjectRepository userProjectRepository, TaskServices taskServices,
                           TaskRepository taskRepository,ProjectServices projectServices,UserRepository userRepository,
                           TaskCommentRepository taskCommentRepository,TaskVerifierRepository taskVerifierRepository,
                           TaskEventService eventService,ProjectNotificationRepository notificationRepository, ProjectRepository projectRepository,
-                          TaskExecutorRepository taskExecutorRepository){
+                          TaskExecutorRepository taskExecutorRepository, CommentService commentService,ModelToDTOConverters modelToDTOConverters){
         this.notificationRepository = notificationRepository;
         this.eventService = eventService;
         this.userProjectRepository = userProjectRepository;
@@ -69,6 +72,8 @@ public class TaskController {
         this.taskCommentRepository = taskCommentRepository;
         this.taskVerifierRepository = taskVerifierRepository;
         this.taskExecutorRepository = taskExecutorRepository;
+        this.commentService = commentService;
+        this.modelToDTOConverters = modelToDTOConverters;
     }
 
     private ObjectMapper mapper = new ObjectMapper();
@@ -107,7 +112,7 @@ public class TaskController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not a part of that project");
         }
 
-        return ResponseEntity.ok(taskServices.taskToDTO(
+        return ResponseEntity.ok(modelToDTOConverters.taskToDTO(
                 taskRepository.findById(task_id)
         ));
     }
@@ -118,6 +123,7 @@ public class TaskController {
                                          @RequestBody UserDTO executor){
         ObjectNode payload = mapper.createObjectNode();
         if(!projectServices.canModifyTasks(project_id)){
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
         }
         if(userProjectRepository.findRolesByUserAndProject(executor.getUserId(),project_id)==null){
@@ -276,7 +282,7 @@ public class TaskController {
         }
         eventService.record(task_id, TaskEventType.STATUS_CHANGED,Auth.user().getUserId(), payload,project_id);
 
-        return ResponseEntity.ok(taskServices.taskToDTO(task));
+        return ResponseEntity.ok(modelToDTOConverters.taskToDTO(task));
     }
 
     @PostMapping("/{task_id}/setStatus")
@@ -329,7 +335,7 @@ public class TaskController {
     public ResponseEntity<?> addComment(@PathVariable("task_id") Integer task_id, @PathVariable("project_id") Integer project_id,
                                         @RequestBody CommentDTO commentDTO){
 
-        if(!taskServices.canAddComments(task_id)){
+        if(!commentService.canAddComments(task_id)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
         }
 
