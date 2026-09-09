@@ -5,14 +5,8 @@ import com.example._d_task.dto.*;
 import com.example._d_task.enums.ProjectRolePermissions;
 import com.example._d_task.enums.ProjectRoles;
 import com.example._d_task.enums.TaskEnum;
-import com.example._d_task.models.ProjectModel;
-import com.example._d_task.models.TaskModel;
-import com.example._d_task.models.UserModel;
-import com.example._d_task.models.UserProjectModel;
-import com.example._d_task.repositories.ProjectRepository;
-import com.example._d_task.repositories.TaskRepository;
-import com.example._d_task.repositories.UserProjectRepository;
-import com.example._d_task.repositories.UserRepository;
+import com.example._d_task.models.*;
+import com.example._d_task.repositories.*;
 import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.services.servicesUtils.ModelToDTOConverters;
 import org.springframework.http.HttpStatus;
@@ -28,18 +22,20 @@ public class ProjectServices {
     private final ProjectRepository projectRepository;
     private final UserProjectRepository userProjectRepository;
     private final UserRepository userRepository;
-
+    private final TaskEventRepository taskEventRepository;
     private final TaskRepository taskRepository;
     private final ModelToDTOConverters modelToDTOConverters;
 
     public ProjectServices(ProjectRepository projectRepository, UserProjectRepository userProjectRepository,
                            UserRepository userRepository,
-                           TaskRepository taskRepository, ModelToDTOConverters modelToDTOConverters){
+                           TaskRepository taskRepository, ModelToDTOConverters modelToDTOConverters,
+                           TaskEventRepository taskEventRepository){
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.userProjectRepository = userProjectRepository;
         this.modelToDTOConverters = modelToDTOConverters;
         this.taskRepository = taskRepository;
+        this.taskEventRepository = taskEventRepository;
     }
 
     public boolean canModifyTasks(Integer project_id){
@@ -270,6 +266,18 @@ public class ProjectServices {
         return ResponseEntity.ok(tasksDTO);
     }
 
+    public ResponseEntity<?> getAllEvents( Integer project_id){
+        List<ProjectRoles> roles =
+                userProjectRepository.findRolesByUserAndProject(
+                        Auth.user().getUserId(),
+                        project_id
+                );
+        if (roles == null || roles.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
+        }
+        List<TaskEventModel> list = taskEventRepository.getAllEvents(project_id);
+        return ResponseEntity.ok(modelToDTOConverters.eventsToDTO(list));
+    }
 
 
 }

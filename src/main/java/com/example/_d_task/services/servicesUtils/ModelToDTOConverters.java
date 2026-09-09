@@ -35,7 +35,6 @@ public class ModelToDTOConverters {
         this.jsonPayloadNormalizer = jsonPayloadNormalizer;
     }
 
-
     public TaskDTO taskToDTO(TaskModel task){
         TaskDTO dto = new TaskDTO();
         dto.setTask_id(task.getTask_id());
@@ -51,6 +50,7 @@ public class ModelToDTOConverters {
         dto.setComments(commentsToDTO(taskCommentRepository.getComments(task.getTask_id())));
         return dto;
     }
+
     public List<ProjectDTO> projectsToDTO(List<ProjectModel> projects){
         return projects.stream().map(
                 project -> new ProjectDTO(project,userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),
@@ -121,7 +121,6 @@ public class ModelToDTOConverters {
         return dtoList;
     }
 
-
     public NotificationDTO notificationToDTO(ProjectNotificationModel notification){
         NotificationDTO dto = new NotificationDTO();
         dto.setNotification_id(notification.getNotification_id());
@@ -154,6 +153,7 @@ public class ModelToDTOConverters {
         );
         return dto;
     }
+
     public List<TaskEventDTO> eventsToDTO(List<TaskEventModel> list){
         List<TaskEventDTO> dtos = new ArrayList<>();
         list.forEach(event -> dtos.add(eventToDTO(event)));

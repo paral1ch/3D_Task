@@ -180,27 +180,13 @@ public class ProjectController {
 
     @GetMapping("/{project_id}/getNotifications")
     public ResponseEntity<?> getNotifications(@PathVariable("project_id")Integer project_id){
-        //List<ProjectNotificationModel> notList = (List<ProjectNotificationModel>) projectRepository.findByProjectId(project_id).getNotifications();
-        List<ProjectNotificationModel> notList = projectNotificationRepository.getFromProject(project_id);
 
-        List<NotificationDTO> list = modelToDTOConverters.notificationsToDTO(notList);
-        list.removeIf(dto -> dto.getAdressed_to() != null);
-        return ResponseEntity.ok(list);
+        return notificationService.getNotifications(project_id);
     }
 
     @GetMapping("/{project_id}/getChangesAll")
     public ResponseEntity<?> getAllEvents(@PathVariable("project_id") Integer project_id){
-        List<ProjectRoles> roles =
-            userProjectRepository.findRolesByUserAndProject(
-                Auth.user().getUserId(),
-                project_id
-            );
-        if (roles == null || roles.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you dont have rights");
-        }
-
-        List<TaskEventModel> list = eventRepository.getAllEvents(project_id);
-        return ResponseEntity.ok(modelToDTOConverters.eventsToDTO(list));
+        return projectService.getAllEvents(project_id);
     }
 
 
@@ -211,15 +197,7 @@ public class ProjectController {
     }
     @PostMapping("/{project_id}/setReaded/{notification_id}")
     public ResponseEntity<?> setReaded(@PathVariable("project_id") Integer project_id, @PathVariable("notification_id") Integer notification_id){
-        if(!projectNotificationRepository.getNotificationById(notification_id).getAdressed_to().equals(Auth.user())){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("forbidden action");
-        }
-        ProjectNotificationModel pnm = projectNotificationRepository.getNotificationById(notification_id);
-        pnm.setReaded(true);
-        projectNotificationRepository.save(pnm);
-
-        return ResponseEntity.ok("Readed");
-
+        return notificationService.setReaded(project_id,notification_id);
     }
 
     @GetMapping({
