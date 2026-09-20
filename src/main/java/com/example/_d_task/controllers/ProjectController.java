@@ -83,17 +83,6 @@ public class ProjectController {
     public ResponseEntity<?> getProjectUsers(@PathVariable Integer project_id){
         return projectService.getProjectUsers(project_id);
     }
-    // Ваще не помню че за эндпоинт и почему у него такой странный путь, потом вспомнить и перелопатить\удалить
-    //@GetMapping(path = "/{project_id}/users/edit")
-    //public ResponseEntity<?> getProjectUsers(@PathVariable Integer project_id, UserDTO userDTO){
-    //    if(ProjectRolePermissions.canModifyProject(userProjectRepository.
-    //            findRolesByUserAndProject(Auth.user().getUserId(), project_id))){
-    //        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You dont have rights");
-    //    }
-    //    return ResponseEntity.ok(userService.convertModelsToDTOInProject(
-    //            userProjectRepository.getUsersFromProject(project_id),project_id
-    //    ));
-    //}
 
     @PostMapping(path = "/{project_id}/delete")
     public ResponseEntity<?> deleteProject(@PathVariable Integer project_id){
