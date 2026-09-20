@@ -27,13 +27,9 @@ import java.util.stream.Collectors;
 public class TaskServices {
 
     private final ProjectRepository projectRepository;
-
     private final TaskRepository taskRepository;
-
     private final UserRepository userRepository;
-
     private final TaskExecutorRepository taskExecutorRepository;
-
     private final TaskVerifierRepository taskVerifierRepository;
     private final UserProjectRepository userProjectRepository;
     private final ProjectNotificationRepository notificationRepository;

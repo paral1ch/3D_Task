@@ -5,16 +5,16 @@ import com.example._d_task.dto.InviteDTO;
 import com.example._d_task.dto.NotificationDTO;
 import com.example._d_task.dto.ProjectDTO;
 import com.example._d_task.models.UserModel;
-import com.example._d_task.repositories.*;
+import com.example._d_task.repositories.ProjectNotificationRepository;
+import com.example._d_task.repositories.ProjectRepository;
+import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.security.Classes.Auth;
-import com.example._d_task.services.*;
+import com.example._d_task.services.NotificationService;
+import com.example._d_task.services.ProjectServices;
+import com.example._d_task.services.UserPerformanceService;
 import com.example._d_task.services.servicesUtils.ModelToDTOConverters;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping(path="/project")
@@ -27,9 +27,6 @@ public class ProjectController {
     private final NotificationService notificationService;
     private final UserPerformanceService userPerformanceService;
     private final ModelToDTOConverters modelToDTOConverters;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
-    private static Logger log = Logger.getLogger(ProjectController.class.getName());
 
     public ProjectController(ProjectRepository projectRepository,
                              UserProjectRepository userProjectRepository,
@@ -50,7 +47,6 @@ public class ProjectController {
     @GetMapping(path = "/myProjects")
     public ResponseEntity<?> getProjects(){
         UserModel user = Auth.user();
-        //log.info(projectService.convertModelsToDTOInProject(userProjectRepository.getProjectsFromUser(user.getUserId())).toString());
         return ResponseEntity.ok(modelToDTOConverters.projectsToDTO(userProjectRepository.getUserProjects(user.getUserId())));
     }
 
@@ -75,8 +71,7 @@ public class ProjectController {
 
     @GetMapping(path = "/myRoles/{project_id}")
     public ResponseEntity<?> myRoles(@PathVariable Integer project_id){
-        return ResponseEntity.ok(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),project_id)
-                +" " + Auth.user() + " "+  project_id);
+        return ResponseEntity.ok(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(),project_id));
     }
 
     @PostMapping(path = "/{project_id}/edit")
@@ -125,11 +120,7 @@ public class ProjectController {
 
     @GetMapping("/{project_id}/getTasks")
     public ResponseEntity<?> getTasks(@PathVariable("project_id") Integer project_id){
-        if(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id) ==null){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cant get tasks from that project");
-        }
-
-        return ResponseEntity.ok(modelToDTOConverters.tasksToDTO(projectRepository.findTasks(project_id)));
+        return projectService.getTasks(project_id);
     }
 
     @GetMapping("/{project_id}/getTasksStats")

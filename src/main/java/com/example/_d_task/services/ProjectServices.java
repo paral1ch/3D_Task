@@ -279,5 +279,12 @@ public class ProjectServices {
         return ResponseEntity.ok(modelToDTOConverters.eventsToDTO(list));
     }
 
+    public ResponseEntity<?> getTasks(Integer project_id){
+        if(userProjectRepository.findRolesByUserAndProject(Auth.user().getUserId(), project_id) ==null){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cant get tasks from that project");
+        }
+
+        return ResponseEntity.ok(modelToDTOConverters.tasksToDTO(projectRepository.findTasks(project_id)));
+    }
 
 }
