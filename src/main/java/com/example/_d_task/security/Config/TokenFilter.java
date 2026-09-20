@@ -1,6 +1,7 @@
 package com.example._d_task.security.Config;
 
 import com.auth0.jwt.JWT;
+import com.example._d_task.enums.TokenTypes;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.SessionRepository;
 import com.example._d_task.repositories.UserRepository;
@@ -37,7 +38,7 @@ public class TokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = extractToken(request);
         if (token != null){
-            if(!jwtService.checkSignature(token,"access")){
+            if(jwtService.checkSignature(token, TokenTypes.ACCESS.name())){
                 UserModel user = userRepository.findByIdNullable(JWT.decode(token).getClaim("id").asInt());
                 if(user!=null){
                     List<GrantedAuthority> authorities = Collections.singletonList(
@@ -46,6 +47,7 @@ public class TokenFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(user,null,authorities);
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+
                 }
             }
         }
@@ -57,6 +59,7 @@ public class TokenFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             return header.substring(7);
         }
+
         return null;
     }
 }

@@ -77,7 +77,7 @@ public class JWTService {
             JWTVerifier verifier = JWT.require(ALG).withIssuer(ISSUER).build();
             DecodedJWT decoded = verifier.verify(token);
             if(!Objects.equals(decoded.getClaim("type").toString(),'"'+  expectedType+'"')){
-                log.info("Wrong type " + decoded.getClaim("type").toString() + " " + expectedType);
+                log.info("Wrong type " + decoded.getClaim("type").toString() + ", expected " + expectedType);
                 return false;
             }
             return !decoded.getExpiresAt().before(Date.from(Instant.now()));
