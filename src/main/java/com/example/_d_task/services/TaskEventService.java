@@ -7,7 +7,6 @@ import com.example._d_task.repositories.ProjectRepository;
 import com.example._d_task.repositories.TaskEventRepository;
 import com.example._d_task.repositories.TaskRepository;
 import com.example._d_task.repositories.UserRepository;
-import com.example._d_task.services.servicesUtils.ModelToDTOConverters;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -19,29 +18,18 @@ import java.time.LocalDateTime;
 public class TaskEventService {
 
     private final TaskRepository taskRepository;
-
     private final UserRepository userRepository;
-
     private final TaskEventRepository eventRepository;
-
-    private final TaskServices taskServices;
-
-    private final UserService userService;
-
     private final ProjectRepository projectRepository;
-    private final ModelToDTOConverters modelToDTOConverters;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public TaskEventService(TaskRepository taskRepository,UserRepository userRepository,TaskEventRepository eventRepository,
-                            TaskServices taskServices, UserService userService,ProjectRepository projectRepository,
-                            ModelToDTOConverters modelToDTOConverters){
-        this.taskServices = taskServices;
+                            ProjectRepository projectRepository
+                            ){
         this.userRepository = userRepository;
         this.taskRepository = taskRepository;
         this.eventRepository = eventRepository;
-        this.userService = userService;
         this.projectRepository = projectRepository;
-        this.modelToDTOConverters = modelToDTOConverters;
     }
 
     public void record(Integer task_id, TaskEventType eventType, Integer user_id, ObjectNode payload, Integer project_id) {
