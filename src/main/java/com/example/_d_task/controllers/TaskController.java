@@ -6,7 +6,6 @@ import com.example._d_task.dto.TaskDTO;
 import com.example._d_task.dto.UserDTO;
 import com.example._d_task.repositories.TaskRepository;
 import com.example._d_task.services.TaskServices;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +25,6 @@ public class TaskController {
         this.taskRepository = taskRepository;
     }
 
-    private ObjectMapper mapper = new ObjectMapper();
     @PostMapping(path = "/create")
     public ResponseEntity<?> createTask(@RequestBody TaskDTO taskDTO, @PathVariable Integer project_id){
         return taskServices.newTask(taskDTO,project_id);

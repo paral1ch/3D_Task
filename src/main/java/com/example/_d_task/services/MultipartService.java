@@ -5,7 +5,6 @@ import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
-import com.example._d_task.controllers.FilesController;
 import com.example._d_task.dto.FileAnnotationDTO;
 import com.example._d_task.dto.FileDTO;
 import com.example._d_task.dto.UploadedPartDTO;
@@ -23,8 +22,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.time.LocalDate;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -204,10 +203,10 @@ public class MultipartService {
     }
 
 
-    public ResponseEntity<?> createBatch(List<FilesController.AnnotationCreateRequest> items){
+    public ResponseEntity<?> createBatch(List<FilesService.AnnotationCreateRequest> items){
 
         List<FileAnnotationsModel> annotations = new ArrayList<>();
-        for(FilesController.AnnotationCreateRequest item: items){
+        for(FilesService.AnnotationCreateRequest item: items){
             if (item == null || item.fileId() == null || item.payload() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("invalid annotation payload");
             }

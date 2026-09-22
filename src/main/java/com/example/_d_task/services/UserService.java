@@ -1,13 +1,18 @@
 package com.example._d_task.services;
 
+import com.example._d_task.dto.ChangePasswordDTO;
 import com.example._d_task.dto.RegisterDTO;
+import com.example._d_task.dto.UserDTO;
 import com.example._d_task.enums.Role;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
+import com.example._d_task.security.Classes.Auth;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class UserService {
@@ -44,9 +49,36 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public UserDTO profile(){
+        if(!Auth.check()){return null;}
+        return Auth.user().getUserDTO();
+    }
 
+    public ResponseEntity<?> editProfile(UserDTO user){
+        UserModel origUser = Auth.user();
+        if(user.getUsername()!=origUser.getUsername() && userRepository.existsByUsername(user.getUsername())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Username already taken");
+        }
 
+        if(user.getEmail()!=origUser.getEmail() && userRepository.existsByEmail(user.getEmail())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Email already exists");
+        }
 
+        origUser.setUsername(user.getUsername());
+        origUser.setEmail(profile().getEmail());
+        origUser.setFullName(user.getFullname());
+        userRepository.save(origUser);
+        return ResponseEntity.ok("Saved");
+    }
 
+    public ResponseEntity<?> changePassword(ChangePasswordDTO pass){
+        if(!Objects.equals(Auth.user().getPashHash(), pass.getOldPassword())){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error");
+        }
+
+        Auth.user().setPassHash(pass.getNewPassword());
+        userRepository.save(Auth.user());
+        return ResponseEntity.ok("Password changed");
+    }
 
 }
