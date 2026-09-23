@@ -8,6 +8,7 @@ import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
 import com.example._d_task.security.Classes.Auth;
+import com.example._d_task.services.servicesUtils.ModelToDTOConverters;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,13 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final UserProjectRepository userProjectRepository;
-
+    private final ModelToDTOConverters converters;
     public UserService(
             UserRepository userRepository,
-            UserProjectRepository userProjectRepository
+            UserProjectRepository userProjectRepository,
+            ModelToDTOConverters converters
     ){
+        this.converters = converters;
         this.userRepository = userRepository;
         this.userProjectRepository = userProjectRepository;
     }
@@ -81,4 +84,7 @@ public class UserService {
         return ResponseEntity.ok("Password changed");
     }
 
+    public  Iterable<UserDTO> getUsers(){
+        return converters.usersToDTO(userRepository.findAll());
+    }
 }

@@ -2,7 +2,6 @@ package com.example._d_task.controllers;
 
 import com.example._d_task.dto.ChangePasswordDTO;
 import com.example._d_task.dto.UserDTO;
-import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.UserRepository;
 import com.example._d_task.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +19,8 @@ public class UserController {
     }
 
     @GetMapping(path = "/AllUsers")
-    public @ResponseBody Iterable<UserModel> getUsers(){
-        return userRepository.findAll();
+    public @ResponseBody Iterable<UserDTO> getUsers(){
+        return userService.getUsers();
     }
 
     //Потом крч сделать что б токен добавлялся в блеклист а не вот это вот все.
