@@ -4,13 +4,11 @@ package com.example._d_task.services;
 import com.example._d_task.dto.LoginDTO;
 import com.example._d_task.dto.SessionDTO;
 import com.example._d_task.models.SessionModel;
-import com.example._d_task.repositories.SessionRepository;
 import com.example._d_task.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 @Service
 public class SessionService {
@@ -18,17 +16,18 @@ public class SessionService {
     private final UserRepository userRepository;
 
     private final JWTService jwtService;
-
-    public SessionService(UserRepository userRepository,SessionRepository sessionRepository,JWTService jwtService){
+    private final PasswordEncoder passwordEncoder;
+    public SessionService(UserRepository userRepository,PasswordEncoder passwordEncoder,JWTService jwtService){
         this.userRepository = userRepository;
         this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public ResponseEntity<?> login(LoginDTO login){
         if(!userRepository.existsByEmail(login.getEmail())){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login Error 1");
         }
-        if(!Objects.equals(userRepository.findByEmail(login.getEmail()).getPashHash(), login.getPassHash())){
+        if(passwordEncoder.matches(login.getPassHash(), userRepository.findByEmail(login.getEmail()).getPashHash())){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login Error 2");
         }
         SessionDTO dto = new SessionDTO();

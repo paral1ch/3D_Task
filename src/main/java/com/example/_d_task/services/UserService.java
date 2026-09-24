@@ -11,9 +11,8 @@ import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.services.servicesUtils.ModelToDTOConverters;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 @Service
 public class UserService {
@@ -21,14 +20,17 @@ public class UserService {
 
     private final UserProjectRepository userProjectRepository;
     private final ModelToDTOConverters converters;
+    private final PasswordEncoder passwordEncoder;
     public UserService(
             UserRepository userRepository,
             UserProjectRepository userProjectRepository,
-            ModelToDTOConverters converters
+            ModelToDTOConverters converters,
+            PasswordEncoder passwordEncoder
     ){
         this.converters = converters;
         this.userRepository = userRepository;
         this.userProjectRepository = userProjectRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public ResponseEntity<String> createUserFromRegister(RegisterDTO registerDTO){
@@ -38,11 +40,13 @@ public class UserService {
         if(userRepository.existsByUsername(registerDTO.getUsername())){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("This username already exists");
         }
+        String encodedPassword = this.passwordEncoder.encode(registerDTO.getPasswordHash());
+
         UserModel user = new UserModel();
         user.setUsername(registerDTO.getUsername());
         user.setFullName(registerDTO.getFullName());
         user.setEmail(registerDTO.getEmail());
-        user.setPassHash(registerDTO.getPasswordHash());
+        user.setPassHash(encodedPassword);
         user.setRole(Role.USER);
         userRepository.save(user);
         return ResponseEntity.ok().body("User created");
@@ -75,11 +79,13 @@ public class UserService {
     }
 
     public ResponseEntity<?> changePassword(ChangePasswordDTO pass){
-        if(!Objects.equals(Auth.user().getPashHash(), pass.getOldPassword())){
+
+        if(passwordEncoder.matches(pass.getOldPassword(), Auth.user().getPassword())){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error");
         }
 
-        Auth.user().setPassHash(pass.getNewPassword());
+        String password = passwordEncoder.encode(pass.getNewPassword());
+        Auth.user().setPassHash(password);
         userRepository.save(Auth.user());
         return ResponseEntity.ok("Password changed");
     }
