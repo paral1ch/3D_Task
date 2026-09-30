@@ -5,7 +5,6 @@ import com.example._d_task.dto.RegisterDTO;
 import com.example._d_task.dto.UserDTO;
 import com.example._d_task.enums.Role;
 import com.example._d_task.models.UserModel;
-import com.example._d_task.repositories.UserProjectRepository;
 import com.example._d_task.repositories.UserRepository;
 import com.example._d_task.security.Classes.Auth;
 import com.example._d_task.services.servicesUtils.ModelToDTOConverters;
@@ -18,18 +17,15 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
 
-    private final UserProjectRepository userProjectRepository;
     private final ModelToDTOConverters converters;
     private final PasswordEncoder passwordEncoder;
     public UserService(
             UserRepository userRepository,
-            UserProjectRepository userProjectRepository,
             ModelToDTOConverters converters,
             PasswordEncoder passwordEncoder
     ){
         this.converters = converters;
         this.userRepository = userRepository;
-        this.userProjectRepository = userProjectRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -40,6 +36,7 @@ public class UserService {
         if(userRepository.existsByUsername(registerDTO.getUsername())){
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("This username already exists");
         }
+
         String encodedPassword = this.passwordEncoder.encode(registerDTO.getPasswordHash());
 
         UserModel user = new UserModel();

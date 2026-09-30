@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class SessionService {
 
     private final UserRepository userRepository;
-
     private final JWTService jwtService;
     private final PasswordEncoder passwordEncoder;
     public SessionService(UserRepository userRepository,PasswordEncoder passwordEncoder,JWTService jwtService){
@@ -27,7 +26,7 @@ public class SessionService {
         if(!userRepository.existsByEmail(login.getEmail())){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login Error 1");
         }
-        if(passwordEncoder.matches(login.getPassHash(), userRepository.findByEmail(login.getEmail()).getPashHash())){
+        if(!passwordEncoder.matches(login.getPassHash(), userRepository.findByEmail(login.getEmail()).getPashHash())){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login Error 2");
         }
         SessionDTO dto = new SessionDTO();

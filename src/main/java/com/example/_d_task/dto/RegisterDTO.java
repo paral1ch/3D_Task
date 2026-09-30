@@ -1,10 +1,11 @@
 package com.example._d_task.dto;
 
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 @Data
+@Validated
 public class RegisterDTO {
-
     private String fullName;
     private String username;
     private String email;
