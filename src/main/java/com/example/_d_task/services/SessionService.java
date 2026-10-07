@@ -27,7 +27,7 @@ public class SessionService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login Error 1");
         }
         if(!passwordEncoder.matches(login.getPassHash(), userRepository.findByEmail(login.getEmail()).getPashHash())){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login Error 2");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Login Error 2 ");
         }
         SessionDTO dto = new SessionDTO();
         String refreshToken = jwtService.createJWTRefresh(userRepository.findByEmail(login.getEmail()));

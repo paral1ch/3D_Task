@@ -11,6 +11,7 @@ import com.example._d_task.enums.TokenTypes;
 import com.example._d_task.models.UserModel;
 import com.example._d_task.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,15 +28,15 @@ public class JWTService {
     private static final int refreshLifespan = 15;
     //Минуты
     private static final int accessLifespan = 15;
-    //Потом вынести в env
-    private static final String JWTKEY = "JWTSECRETKEY";
-    private static final Algorithm ALG = Algorithm.HMAC384(JWTKEY);
+
+    private final Algorithm ALG;
     private final String ISSUER = "3D-TASK";
     private final UserRepository userRepository;
     private final List<String> blacklist = new ArrayList<>();
     private static final Logger LOGGER = Logger.getLogger(JWTService.class.getName());
-    public JWTService(UserRepository userRepository){
+    public JWTService(UserRepository userRepository, @Value("${jwt.secretKey}") String JWTKEY){
         this.userRepository = userRepository;
+        this.ALG = Algorithm.HMAC384(JWTKEY);
     };
 
     public  String createJWTRefresh(UserModel user){
